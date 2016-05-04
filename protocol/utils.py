@@ -83,6 +83,19 @@ def fetch_significant_genes(input_dir, qval, config):
     return signif_dict
 
 
+def read_method_overlap_genes(path, min_methods):
+    # read data
+    df = pd.read_table(path)
+
+    # add up all genes with min overlap
+    gene_list = []
+    for i in range(min_methods, len(df.columns)+1):
+        tmp = df[str(i)].dropna().tolist()
+        gene_list += tmp
+
+    return gene_list
+
+
 def fetch_raw_dataframes(input_dir):
     data_dict = {}
     for method_file in os.listdir(input_dir):
@@ -95,6 +108,26 @@ def fetch_raw_dataframes(input_dir):
         data_dict[method_name] = df
 
     return data_dict
+
+
+def fetch_filtered_dataframes(input_dir, output_dir, min_methods):
+    # get the raw results
+    df_dict = fetch_raw_dataframes(input_dir)
+
+    # get the overlapping genes
+    overlap_path = os.path.join(output_dir, 'gene_overlap_counts.txt')
+    overlap_genes = read_method_overlap_genes(overlap_path, min_methods)
+
+    # iterate over each method
+    for method in df_dict:
+        # filter out agreed upon genes
+        df_copy = df_dict[method].copy()
+        df_copy = df_copy[~df_copy['gene'].isin(overlap_genes)]
+
+        # update dictionary
+        df_dict[method] = df_copy
+
+    return df_dict
 
 
 def load_config(path):

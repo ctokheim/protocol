@@ -29,7 +29,9 @@ def main(opts):
     config = utils.load_config(opts['config'])
 
     # get full data for each method
-    full_data = utils.fetch_raw_dataframes(opts['input_dir'])
+    full_data = utils.fetch_filtered_dataframes(opts['input_dir'],
+                                                opts['output'],
+                                                opts['min'])
 
     # compute MLFC scores
     mlfc_result = {m: calculate_mlfc(full_data[m], m, config)
