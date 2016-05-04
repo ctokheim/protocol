@@ -29,6 +29,10 @@ def parse_arguments():
 
     # add subparsers
     subparsers = parent_parser.add_subparsers(title='Sub-commands', dest='kind')
+    parser_split = subparsers.add_parser('split_mutations',
+                                         help='Splits mutations in a MAF-like format into two random halves',
+                                         description='Splits mutations in a MAF-like format into two random halves. '
+                                         'Each split maintains the proportion of samples in each cancer type.')
     parser_cgc = subparsers.add_parser('cgc_overlap',
                                        help='Evaluate the overlap of significant genes with the Cancer Gene Census (CGC)',
                                        description='Evaluate the overlap of significant genes with the Cancer Gene Census (CGC)')
@@ -48,15 +52,22 @@ def parse_arguments():
                                        'of inactivating mutations than expected.')
 
     # program arguments
-    for i, parser in enumerate([parser_cgc, parser_ovlp, parser_pval, parser_signif, parser_tsg]):
+    for i, parser in enumerate([parser_split, parser_cgc, parser_ovlp, parser_pval,
+                                parser_signif, parser_tsg]):
         # group of parameters
         major_parser = parser.add_argument_group(title='Major options')
         advance_parser = parser.add_argument_group(title='Advanced options')
 
-        help_str = 'directory containing input files'
-        major_parser.add_argument('-i', '--input-dir',
-                                  type=str, default=None,
-                                  help=help_str)
+        if i > 0:
+            help_str = 'directory containing input files'
+            major_parser.add_argument('-i', '--input-dir',
+                                    type=str, default=None,
+                                    help=help_str)
+        else:
+            help_str = 'Mutation file to split'
+            major_parser.add_argument('-m', '--mutations',
+                                      type=str, required=True,
+                                      help=help_str)
         help_str = 'Configuration file (YAML format)'
         major_parser.add_argument('-config', '--config',
                                   type=str, default=None,
@@ -67,6 +78,16 @@ def parse_arguments():
                                   help=help_str)
 
         if i == 0:
+            help_str = ('Column name containing sample IDs (Default: checks '
+                        '"Tumor_Sample_Barcode" or "Tumor_Sample")')
+            advance_parser.add_argument('-s', '--sample-col',
+                                        type=str,
+                                        help=help_str)
+            help_str = 'Number of iterations to randomly split data (Default: 10)'
+            advance_parser.add_argument('-n', '--number',
+                                        type=int, default=10,
+                                        help=help_str)
+        elif i == 1:
             help_str = 'Path to Cancer Gene Census file'
             major_parser.add_argument('-c', '--cgc',
                                       type=str, required=True,
@@ -75,7 +96,7 @@ def parse_arguments():
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
-        if i == 1:
+        elif i == 2:
             help_str = ('Compare overlap with other methods already evaluated '
                         'in Tokheim et al. 2016 (choose "pancan", "breast", '
                         '"pancreatic", "head", "lung"). Default, doesn\'t include '
@@ -87,13 +108,13 @@ def parse_arguments():
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
-        elif i == 2:
+        elif i == 3:
             help_str = ('Minimum number of methods finding a gene significant to '
                         'not include that gene\' p-value (Default: 3)')
             major_parser.add_argument('-m', '--min',
                                       type=int, default=3,
                                       help=help_str)
-        elif i == 3:
+        elif i == 4:
             help_str = 'Q-value threshold for significance (Default: 0.1)'
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
@@ -122,7 +143,10 @@ def parse_arguments():
 
 
 def main(opts):
-    if opts['kind'] == 'cgc_overlap':
+    if opts['kind'] == 'split_mutations':
+        import split_mutations
+        split_mutations.main(opts)
+    elif opts['kind'] == 'cgc_overlap':
         import cgc_overlap
         cgc_overlap.main(opts)
     elif opts['kind'] == 'method_overlap':

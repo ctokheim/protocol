@@ -31,7 +31,7 @@ class RandomSplit(object):
         #n = int(self.sub_sample * self.total_count)  # number of counts to sample
 
         for i in range(self.num_iter):
-            logger.info('Feature generation: Iteration={1} . . .'.format(self.sub_sample, i))
+            logger.info('Mutation split: Iteration={1} . . .'.format(self.sub_sample, i))
             left_samples = []
             right_samples = []
 
@@ -85,7 +85,7 @@ class RandomSplit(object):
                 left_df[self.COLUMN_NAME] = left_names
                 right_df[self.COLUMN_NAME] = right_names
 
-            logger.info('Finished feature generation: Iteration={1}'.format(self.sub_sample, i))
+            logger.info('Finished mutation split: Iteration={1}'.format(self.sub_sample, i))
             yield left_df, right_df
 
     def set_sub_sample(self, sub_sample):

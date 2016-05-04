@@ -41,7 +41,7 @@ def main(opts):
     mymkdir(opts['output'])
 
     # read in data
-    df = pd.read_csv(opts['input'], sep='\t')
+    df = pd.read_csv(opts['mutations'], sep='\t')
 
     # figure out the sample column
     if opts['sample_col'] is not None:
@@ -57,7 +57,7 @@ def main(opts):
     # setup random splitting object
     SAMPLE_RATE = .5  # half splits
     dfg = RandomSplit(df.copy(),
-                      col_name=sample_col,
+                      col_name=samp_col,
                       sub_sample=SAMPLE_RATE,
                       num_iter=opts['number'])
 
