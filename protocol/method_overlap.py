@@ -46,8 +46,12 @@ def method_overlap_count(signif_genes, gene_counts):
 
 
 def main(opts):
+    config = utils.load_config(opts['config'])
+
     # get the significant genes for each method
-    signif_dict = utils.fetch_significant_genes(opts['input_dir'], opts['qvalue'])
+    signif_dict = utils.fetch_significant_genes(opts['input_dir'],
+                                                opts['qvalue'],
+                                                config)
     num_methods = len(signif_dict)
 
     # count how many time each gene is significant

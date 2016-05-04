@@ -57,6 +57,10 @@ def parse_arguments():
         major_parser.add_argument('-i', '--input-dir',
                                   type=str, default=None,
                                   help=help_str)
+        help_str = 'Configuration file (YAML format)'
+        major_parser.add_argument('-config', '--config',
+                                  type=str, default=None,
+                                  help=help_str)
         help_str = 'output directory'
         major_parser.add_argument('-o', '--output',
                                   type=str, default=None,
