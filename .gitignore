@@ -46,4 +46,5 @@ Session.vim
 .netrwhist
 *~
 
-
+data/
+output/
