@@ -58,4 +58,9 @@ def main(opts):
     cgc_path = os.path.join(opts['output'], 'cgc_overlap.txt')
     overlap_df.to_csv(cgc_path, sep='\t')
 
+    if opts['plot']:
+        import plot_data
+        cgc_path = os.path.join(opts['output'], 'cgc_overlap.pdf')
+        plot_data.cgc_overlap(overlap_df, cgc_path)
+
     logger.info('Finished cgc_overlap sub-command.')

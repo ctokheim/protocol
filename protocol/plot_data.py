@@ -115,44 +115,35 @@ def method_overlap(overlap_df, path):
     plt.savefig(path, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-def cgc_overlap():
-    overlaps = [ad_list, oncofm_list, oncofml_list, oncoclust_list, music_list, tuson_list, mutsig_list, twentyPlus_list]
-    #name = ['{0}/{1}'.format(*l) for l in overlaps]
-    name = ['{0}'.format(*l) for l in overlaps]
-
+def cgc_overlap(cgc_overlap_df, path):
     # Function to label bars
     def autolabel(rects):
         # attach some text labels
         for ii, rect in enumerate(rects):
             height = rect.get_height()
             plt.text(rect.get_x()+rect.get_width()/2., height+.005, '%s' % (name[ii]),
-                    ha='center', va='bottom', size=16)
-
-    # get data ready to plot
-    mymethods = ['ActiveDriver', 'OncodriveFM', 'OncodriveFML', 'OncodriveClust', 'MuSiC', 'TUSON', 'MutsigCV', '20/20+']
-    plot_df = pd.DataFrame({'# CGC genes': [ad_list[0], oncofm_list[0], oncofml_list[0], oncoclust_list[0], music_list[0],
-                                            tuson_list[0], mutsig_list[0], twentyPlus_list[0]],
-                            'total': [ad_list[1], oncofm_list[1], oncofml_list[1], oncoclust_list[1], music_list[1],
-                                    tuson_list[1], mutsig_list[1], twentyPlus_list[1]]},
-                        index=mymethods)
-    plot_df['Fraction Overlap'] = plot_df['# CGC genes'].astype(float) / plot_df['total']
-    plot_df.to_clipboard()
+                     ha='center', va='bottom', size=16)
 
     # plot barplot
+    mymethods = cgc_overlap_df.sort('Fraction overlap (CGC)').index.tolist()
+    name = cgc_overlap_df.ix[mymethods]['# CGC'].tolist()
     with sns.axes_style('ticks'), sns.plotting_context('talk', font_scale=1.5):
-        ax = sns.barplot(plot_df.index, plot_df['Fraction Overlap'], order=mymethods, color='black')
+        ax = sns.barplot(cgc_overlap_df.index,
+                         cgc_overlap_df['Fraction overlap (CGC)'],
+                         order=mymethods, color='black')
 
         # label each bar
         autolabel(ax.patches)
 
         # fiddle with formatting
         ax.set_xlabel('Methods')
-        ax.set_ylabel('Fraction Overlap (CGC)')
-        #ax.set_title('Overlap = CGC Genes')
+        ax.set_ylabel('Fraction overlap (CGC)')
         sns.despine()
         plt.xticks(rotation=45, ha='right', va='top')
-        #ax.set_aspect(11)
         plt.gcf().set_size_inches(7, 7)
-        plt.ylim((0, .5))
         # change tick padding
         plt.gca().tick_params(axis='x', which='major', pad=0)
+
+    # save plot
+    plt.tight_layout()
+    plt.savefig(path)

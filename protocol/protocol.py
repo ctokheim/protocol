@@ -124,6 +124,10 @@ def parse_arguments():
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
+            help_str = 'Generate plots examining evaluation (Default: False)'
+            advance_parser.add_argument('-p', '--plot',
+                                        action='store_true', default=False,
+                                        help=help_str)
         elif i == 3:
             help_str = 'Q-value threshold for significance (Default: 0.1)'
             advance_parser.add_argument('-q', '--qvalue',
