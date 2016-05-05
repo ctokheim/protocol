@@ -3,7 +3,6 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
-import IPython
 
 def qqplot(data,
            ax=None,
