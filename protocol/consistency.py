@@ -63,8 +63,13 @@ def main(opts):
     output_path = os.path.join(opts['output'], 'consistency.txt')
     final_df.to_csv(output_path, sep='\t')
 
-    logger.info('Finished consistency sub-command.')
+    # save plot if specified
+    if opts['plot']:
+        import plot_data
+        output_path = os.path.join(opts['output'], 'consistency.pdf')
+        plot_data.consistency(final_df, opts['depth'], output_path)
 
+    logger.info('Finished consistency sub-command.')
     return final_df
 
 

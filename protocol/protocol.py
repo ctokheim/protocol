@@ -65,7 +65,7 @@ def parse_arguments():
             major_parser.add_argument('-i', '--input-dir',
                                     type=str, default=None,
                                     help=help_str)
-        else:
+        elif i == 1:
             help_str = 'Mutation file to split'
             major_parser.add_argument('-m', '--mutations',
                                       type=str, required=True,
@@ -152,6 +152,10 @@ def parse_arguments():
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
+            help_str = 'Generate plots examining evaluation (Default: False)'
+            advance_parser.add_argument('-p', '--plot',
+                                        action='store_true', default=False,
+                                        help=help_str)
         elif i == 6:
             help_str = 'Directory containing the consistency results'
             major_parser.add_argument('-consis-dir', '--consistency-dir',
@@ -160,6 +164,10 @@ def parse_arguments():
             help_str = 'Ranking depth to consider for consistency (Default: 100)'
             advance_parser.add_argument('-d', '--depth',
                                         type=int, default=100,
+                                        help=help_str)
+            help_str = 'Generate plots examining evaluation (Default: False)'
+            advance_parser.add_argument('-p', '--plot',
+                                        action='store_true', default=False,
                                         help=help_str)
 
     args = parent_parser.parse_args()

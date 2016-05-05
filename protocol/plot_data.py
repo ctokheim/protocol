@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
@@ -159,5 +160,49 @@ def mlfc_score(mlfc, path):
         plt.gcf().set_size_inches(7, 7)
         plt.gca().tick_params(axis='x', which='major', pad=0)
 
+    plt.tight_layout()
+    plt.savefig(path)
+
+
+def num_signif(num_genes, path):
+    num_genes.sort_values(inplace=True, ascending=True)
+    with sns.axes_style('ticks'), sns.plotting_context('talk', font_scale=1.5):
+        sns.barplot(num_genes.index, num_genes, color='black')
+        sns.despine()
+        plt.gca().set_xticklabels(num_genes.index, rotation=45, ha='right')
+        plt.ylabel('# Significant Genes')
+        plt.gcf().set_size_inches(7, 7)
+        plt.gca().tick_params(axis='x', which='major', pad=0)
+
+    plt.tight_layout()
+    plt.savefig(path)
+
+
+def consistency(consis_df, depth, path):
+    # get col names and format order
+    mean_col = 'TopDrop {0} overlap mean'.format(depth)
+    sem_col = 'TopDrop {0} overlap sem'.format(depth)
+    method_order = consis_df.sort(mean_col).index.tolist()
+
+    # make plot
+    with sns.axes_style('ticks'), sns.plotting_context('talk', font_scale=1.5):
+            myax = sns.barplot(method_order, consis_df[mean_col].ix[method_order],
+                               order=method_order, color=sns.xkcd_rgb["grey"])
+            myax.errorbar(np.arange(len(method_order)), consis_df[mean_col].ix[method_order],
+                          yerr=consis_df[sem_col].ix[method_order],
+                          fmt=None, ecolor=sns.xkcd_rgb["black"],
+                          elinewidth=2, capsize=9, capthick=2)
+            myax.set_xticklabels(method_order, rotation=45, ha='right')
+            myax.yaxis.set_ticks_position('left')
+            myax.xaxis.set_ticks_position('bottom')
+            myax.set_ylabel('TopDrop Consistency ({0})'.format(depth))
+            myax.set_ylim((0, 1.0))
+
+            sns.despine()
+            ax = plt.gca()
+            plt.gca().tick_params(axis='x', which='major', pad=0)
+
+    # save output
+    plt.gcf().set_size_inches(7, 7)
     plt.tight_layout()
     plt.savefig(path)
