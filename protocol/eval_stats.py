@@ -1,5 +1,8 @@
 import numpy as np
+import scipy.stats as stats
 import pandas as pd
+import utils
+import IPython
 
 
 def top_drop_overlap(s1, s2, depth):
@@ -39,14 +42,14 @@ def calculate_sem(wp):
     tmp_sem : pd.DataFrame
         standard error of the mean calculated along the sample axis
     """
-    tmp_sem_matrix = np.apply_along_axis(stats.sem, 0, wp.values)  # hack because pandas apply method has a bug
-    tmp_sem = pd.DataFrame(tmp_sem_matrix,
-                           columns=wp.minor_axis,
-                           index=wp.major_axis)
+    #tmp_sem_matrix = np.apply_along_axis(stats.sem, 0, wp.values)  # hack because pandas apply method has a bug
+    #tmp_sem = pd.DataFrame(tmp_sem_matrix,
+                           #columns=wp.minor_axis,
+                           #index=wp.major_axis)
     return tmp_sem
 
 
-def calculate_stats(result_dict,
+def calculate_stats(df,
                     metrics=['precision', 'recall', 'ROC AUC', 'PR AUC', 'count']):
     """Computes mean and sem of classification performance metrics.
 
@@ -63,35 +66,41 @@ def calculate_stats(result_dict,
         Data frame with mean and sem of classification performance
         metrics. (rows: "oncogene"/"tsg", columns: summarized metrics)
     """
-    wp = pd.Panel(result_dict)
-    tmp_means = wp.mean(axis=0)
-    tmp_sem = calculate_sem(wp)
-    result_df = pd.merge(tmp_means, tmp_sem,
-                         left_index=True, right_index=True,
-                         suffixes=(' mean', ' sem'))
+    tmp_means = df.mean()
+    tmp_sem = df.sem()
+    name = df.columns[0]
+    result_df = pd.DataFrame({name+' mean': tmp_means,
+                              name+' sem': tmp_sem})
+    result_df.rename(index=lambda x: df.index[0], inplace=True)
     return result_df
 
 
-def consistency_comparison(df1, df2, mydepth):
+def consistency_comparison(df1, df2, mydepth,
+                           method, config):
     """Function called by multiprocessing to run predictions.
 
     """
+    # figure out which column to use
+    if utils.is_valid_config(config, method, 'consistency'):
+        pval_cols = config[method]['consistency']
+    else:
+        pval_cols = 'pvalue'
 
-    results = pd.DataFrame(index=['driver'])
+    results = pd.DataFrame(index=[method])
 
-    pval1 = df1['pvalue'].copy()
-    pval2 = df2['pvalue'].copy()
+    pval1 = df1[pval_cols].min(axis=1).copy()
+    pval2 = df2[pval_cols].min(axis=1).copy()
     pval1.sort_values(ascending=True, inplace=True)
     pval2.sort_values(ascending=True, inplace=True)
 
     # add top-drop scores
-    top_drop = sim.top_drop_overlap(pval1, pval2, depth=mydepth)
+    top_drop = top_drop_overlap(pval1, pval2, depth=mydepth)
     td_scores = [top_drop]
 
     tmp_results = pd.DataFrame({
         'TopDrop {0} overlap'.format(mydepth): td_scores
     },
-    index=['driver'])
+    index=[method])
     results = pd.concat([results, tmp_results], axis=1)
 
     return results

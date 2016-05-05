@@ -45,15 +45,14 @@ def parse_arguments():
     parser_signif = subparsers.add_parser('num_signif',
                                           help='Examine the number of significant genes',
                                           description='Examine the number of significant genes')
-    help_info = 'Find statistically significant Tumor Suppressor-like genes.'
-    parser_tsg = subparsers.add_parser('tsg',
-                                       help=help_info,
-                                       description=help_info + ' Evaluates for a higher proportion '
-                                       'of inactivating mutations than expected.')
+    help_info = 'Evaluate method consistency'
+    parser_consis = subparsers.add_parser('consistency',
+                                          help=help_info,
+                                          description='Evaluate method consistency')
 
     # program arguments
     for i, parser in enumerate([parser_split, parser_cgc, parser_ovlp, parser_pval,
-                                parser_signif, parser_tsg]):
+                                parser_signif, parser_consis]):
         # group of parameters
         major_parser = parser.add_argument_group(title='Major options')
         advance_parser = parser.add_argument_group(title='Advanced options')
@@ -119,6 +118,12 @@ def parse_arguments():
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
+        elif i == 5:
+            help_str = 'Ranking depth to consider for consistency (Default: 100)'
+            advance_parser.add_argument('-d', '--depth',
+                                        type=int, default=100,
+                                        help=help_str)
+
     args = parent_parser.parse_args()
 
     # handle logging
@@ -158,6 +163,9 @@ def main(opts):
     elif opts['kind'] == 'num_signif':
         import num_genes
         num_genes.main(opts)
+    elif opts['kind'] == 'consistency':
+        import consistency
+        consistency.main(opts)
 
 
 if __name__ == '__main__':
