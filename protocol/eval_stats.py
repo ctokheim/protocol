@@ -2,7 +2,7 @@ import numpy as np
 import scipy.stats as stats
 import pandas as pd
 import utils
-import IPython
+import sys
 
 
 def top_drop_overlap(s1, s2, depth):
@@ -85,6 +85,13 @@ def consistency_comparison(df1, df2, mydepth,
         pval_cols = config[method]['consistency']
     else:
         pval_cols = ['pvalue']
+
+    # check to see if the columns exist
+    all_exist = all([p in df1.columns for p in pval_cols])
+    if not all_exist:
+        print('Not all p-value columns were named correctly. Please specify '
+              'correct name in config file.')
+        sys.exit(1)
 
     results = pd.DataFrame(index=[method])
 
