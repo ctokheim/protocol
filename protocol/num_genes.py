@@ -24,5 +24,11 @@ def main(opts):
     out_path = os.path.join(opts['output'], 'num_significant.txt')
     num_series.to_csv(out_path, sep='\t')
 
+    # plot results
+    if opts['plot']:
+        import plot_data
+        out_path = os.path.join(opts['output'], 'num_significant.pdf')
+        plot_data.num_signif(num_series, out_path)
+
     logger.info('Finished num_signif sub-command.')
     return num_series
