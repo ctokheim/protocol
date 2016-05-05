@@ -84,7 +84,7 @@ def consistency_comparison(df1, df2, mydepth,
     if utils.is_valid_config(config, method, 'consistency'):
         pval_cols = config[method]['consistency']
     else:
-        pval_cols = 'pvalue'
+        pval_cols = ['pvalue']
 
     results = pd.DataFrame(index=[method])
 
