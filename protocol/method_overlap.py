@@ -78,4 +78,11 @@ def main(opts):
     gene_overlap_df.to_csv(gene_path, sep='\t', index=False)
     method_path = os.path.join(opts['output'], 'method_overlap_counts.txt')
     method_ovlp_df.to_csv(method_path, sep='\t', index=False)
+
+    # save plot
+    if opts['plot']:
+        import plot_data
+        plot_path = os.path.join(opts['output'], 'method_overlap.pdf')
+        plot_data.method_overlap(method_ovlp_df, plot_path)
+
     logger.info('Finished method_overlap sub-command.')

@@ -2,6 +2,7 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
+import IPython
 
 def qqplot(data,
            ax=None,
@@ -74,18 +75,16 @@ def multi_qqplot(data, max_pval=1.0):
             myax.set_ylim((0, max_pval))
 
 
-def method_overlap():
-    overlap_df = pd.DataFrame({'unique': [1.0] * len(method_names),
-                               '1': atleast2,
-                               '2': atleast3,
-                               '>=3': atleast4,
-                               "Method": method_names,
-                               "Total": num_methods},
-                              index=method_names)
-    # add oncodrivefm
-    #overlap_df = overlap_df.append(oncofm_line)
+def method_overlap(overlap_df, path):
+    # calculate the fractions
+    overlap_df['unique'] = 1.0
+    mycols = ['1', '2', '>=3']
+    overlap_df.loc[:, mycols] = overlap_df.loc[:, mycols].astype(float).div(overlap_df['Total'], axis=0)
+    overlap_df['2'] = overlap_df['2'] + overlap_df['>=3']
+    overlap_df['1'] = overlap_df['1'] + overlap_df['2']
 
-    mymethods = ['MuSiC', 'ActiveDriver', 'OncodriveClust', 'OncodriveFM', 'OncodriveFML', 'TUSON', 'MutsigCV', '20/20+']
+    # order methods in increasing order
+    mymethods = overlap_df.sort_values('1')['Method'].tolist()
 
     colors = ['white'] + sns.cubehelix_palette(3)[:3]
     for i, col in enumerate(['unique', '1', '2', '>=3']):
@@ -94,9 +93,8 @@ def method_overlap():
                         color=colors[i], label=col, order=mymethods,)
 
             # Finishing touches
-            plt.tight_layout()
-            plt.legend(bbox_to_anchor=(1, .75), loc='upper left',
-                       ncol=1, title='Overlapping\nmethods')
+            lgd = plt.legend(bbox_to_anchor=(1, .75), loc='upper left',
+                             ncol=1, title='Overlapping\nmethods')
             plt.ylim((0, 1))
             plt.ylabel('Fraction Overlap (methods)')
             plt.gca().set_xticklabels(mymethods, rotation=45, ha='right')
@@ -112,6 +110,9 @@ def method_overlap():
 
             # change tick padding
             plt.gca().tick_params(axis='x', which='major', pad=0)
+
+    plt.tight_layout()
+    plt.savefig(path, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
 def cgc_overlap():

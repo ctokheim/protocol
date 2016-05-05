@@ -101,6 +101,10 @@ def parse_arguments():
             advance_parser.add_argument('-d', '--depth',
                                         type=int, default=100,
                                         help=help_str)
+            help_str = 'Generate plots examining evaluation (Default: False)'
+            advance_parser.add_argument('-p', '--plot',
+                                        action='store_true', default=False,
+                                        help=help_str)
         if i == 1:
             help_str = ('Column name containing sample IDs (Default: checks '
                         '"Tumor_Sample_Barcode" or "Tumor_Sample")')
@@ -121,16 +125,13 @@ def parse_arguments():
                                         type=float, default=.1,
                                         help=help_str)
         elif i == 3:
-            help_str = ('Compare overlap with other methods already evaluated '
-                        'in Tokheim et al. 2016 (choose "pancan", "breast", '
-                        '"pancreatic", "head", "lung"). Default, doesn\'t include '
-                        'previously computed genes.')
-            advance_parser.add_argument('-p', '--pre-computed',
-                                        type=str, default=None,
-                                        help=help_str)
             help_str = 'Q-value threshold for significance (Default: 0.1)'
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
+                                        help=help_str)
+            help_str = 'Generate plots examining evaluation (Default: False)'
+            advance_parser.add_argument('-p', '--plot',
+                                        action='store_true', default=False,
                                         help=help_str)
         elif i == 4:
             help_str = ('Minimum number of methods finding a gene significant to '
