@@ -3,6 +3,9 @@ import os
 from collections import Counter
 import utils
 
+# logging
+import logging
+logger = logging.getLogger(__name__)
 
 def gene_overlap_count(cts, num_methods):
     # now count the number of overlaps
@@ -46,6 +49,7 @@ def method_overlap_count(signif_genes, gene_counts):
 
 
 def main(opts):
+    logger.info('Running method_overlap sub-command . . .')
     config = utils.load_config(opts['config'])
 
     # get the significant genes for each method
@@ -74,3 +78,4 @@ def main(opts):
     gene_overlap_df.to_csv(gene_path, sep='\t', index=False)
     method_path = os.path.join(opts['output'], 'method_overlap_counts.txt')
     method_ovlp_df.to_csv(method_path, sep='\t', index=False)
+    logger.info('Finished method_overlap sub-command.')

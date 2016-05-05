@@ -4,6 +4,10 @@ import eval_stats
 import utils
 import os
 
+# logging
+import logging
+logger = logging.getLogger(__name__)
+
 def calculate_mlfc(df, meth_name, config):
     # check whether there is custom p-value columns
     if utils.is_valid_config(config, meth_name, 'pvalue'):
@@ -25,6 +29,7 @@ def calculate_mlfc(df, meth_name, config):
 
 
 def main(opts):
+    logger.info('Running p-value sub-command . . .')
     # load config
     config = utils.load_config(opts['config'])
 
@@ -41,5 +46,6 @@ def main(opts):
     # save output
     mlfc_path = os.path.join(opts['output'], 'mlfc_scores.txt')
     mlfc_series.to_csv(mlfc_path, sep='\t')
+    logger.info('Finished p-value sub-command.')
 
     return mlfc_result

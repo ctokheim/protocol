@@ -29,6 +29,9 @@ def parse_arguments():
 
     # add subparsers
     subparsers = parent_parser.add_subparsers(title='Sub-commands', dest='kind')
+    parser_pipeline = subparsers.add_parser('pipeline',
+                                            help='Run all sub-commands evaluating methods',
+                                            description='Run all sub-commands evaluating methods')
     parser_split = subparsers.add_parser('split_mutations',
                                          help='Splits mutations in a MAF-like format into two random halves',
                                          description='Splits mutations in a MAF-like format into two random halves. '
@@ -51,14 +54,14 @@ def parse_arguments():
                                           description='Evaluate method consistency')
 
     # program arguments
-    for i, parser in enumerate([parser_split, parser_cgc, parser_ovlp, parser_pval,
-                                parser_signif, parser_consis]):
+    for i, parser in enumerate([parser_pipeline, parser_split, parser_cgc, parser_ovlp,
+                                parser_pval, parser_signif, parser_consis]):
         # group of parameters
         major_parser = parser.add_argument_group(title='Major options')
         advance_parser = parser.add_argument_group(title='Advanced options')
 
-        if i > 0:
-            help_str = 'directory containing input files'
+        if i != 1 and i != 6:
+            help_str = 'directory containing results from methods on full data'
             major_parser.add_argument('-i', '--input-dir',
                                     type=str, default=None,
                                     help=help_str)
@@ -77,6 +80,28 @@ def parse_arguments():
                                   help=help_str)
 
         if i == 0:
+            help_str = 'Path to Cancer Gene Census file'
+            major_parser.add_argument('-c', '--cgc',
+                                      type=str, required=True,
+                                      help=help_str)
+            help_str = ('Minimum number of methods finding a gene significant to '
+                        'not include that gene\' p-value (Default: 3)')
+            major_parser.add_argument('-m', '--min',
+                                      type=int, default=3,
+                                      help=help_str)
+            help_str = 'Directory containing the consistency results'
+            major_parser.add_argument('-consis-dir', '--consistency-dir',
+                                      type=str, required=True,
+                                      help=help_str)
+            help_str = 'Q-value threshold for significance (Default: 0.1)'
+            advance_parser.add_argument('-q', '--qvalue',
+                                        type=float, default=.1,
+                                        help=help_str)
+            help_str = 'Ranking depth to consider for consistency (Default: 100)'
+            advance_parser.add_argument('-d', '--depth',
+                                        type=int, default=100,
+                                        help=help_str)
+        if i == 1:
             help_str = ('Column name containing sample IDs (Default: checks '
                         '"Tumor_Sample_Barcode" or "Tumor_Sample")')
             advance_parser.add_argument('-s', '--sample-col',
@@ -86,7 +111,7 @@ def parse_arguments():
             advance_parser.add_argument('-n', '--number',
                                         type=int, default=10,
                                         help=help_str)
-        elif i == 1:
+        elif i == 2:
             help_str = 'Path to Cancer Gene Census file'
             major_parser.add_argument('-c', '--cgc',
                                       type=str, required=True,
@@ -95,7 +120,7 @@ def parse_arguments():
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
-        elif i == 2:
+        elif i == 3:
             help_str = ('Compare overlap with other methods already evaluated '
                         'in Tokheim et al. 2016 (choose "pancan", "breast", '
                         '"pancreatic", "head", "lung"). Default, doesn\'t include '
@@ -107,18 +132,22 @@ def parse_arguments():
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
-        elif i == 3:
+        elif i == 4:
             help_str = ('Minimum number of methods finding a gene significant to '
                         'not include that gene\' p-value (Default: 3)')
             major_parser.add_argument('-m', '--min',
                                       type=int, default=3,
                                       help=help_str)
-        elif i == 4:
+        elif i == 5:
             help_str = 'Q-value threshold for significance (Default: 0.1)'
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
                                         help=help_str)
-        elif i == 5:
+        elif i == 6:
+            help_str = 'Directory containing the consistency results'
+            major_parser.add_argument('-consis-dir', '--consistency-dir',
+                                      type=str, required=True,
+                                      help=help_str)
             help_str = 'Ranking depth to consider for consistency (Default: 100)'
             advance_parser.add_argument('-d', '--depth',
                                         type=int, default=100,
@@ -148,7 +177,18 @@ def parse_arguments():
 
 
 def main(opts):
-    if opts['kind'] == 'split_mutations':
+    if opts['kind'] == 'pipeline':
+        import cgc_overlap
+        import method_overlap
+        import p_value
+        import num_genes
+        import consistency
+        cgc_overlap.main(opts)
+        method_overlap.main(opts)
+        p_value.main(opts)
+        num_genes.main(opts)
+        consistency.main(opts)
+    elif opts['kind'] == 'split_mutations':
         import split_mutations
         split_mutations.main(opts)
     elif opts['kind'] == 'cgc_overlap':

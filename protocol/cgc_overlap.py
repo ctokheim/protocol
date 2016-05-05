@@ -3,6 +3,9 @@ import os
 from collections import Counter
 import utils
 
+# logging
+import logging
+logger = logging.getLogger(__name__)
 
 def process_cgc(path):
     """Get the list of CGC genes with small somatic variants."""
@@ -30,6 +33,7 @@ def num_cgc_overlap(signif_genes, cgc_list):
 
 
 def main(opts):
+    logger.info('Running cgc_overlap sub-command . . .')
     config = utils.load_config(opts['config'])
 
     # get the significant genes for each method
@@ -53,3 +57,5 @@ def main(opts):
     # save result
     cgc_path = os.path.join(opts['output'], 'cgc_overlap.txt')
     overlap_df.to_csv(cgc_path, sep='\t')
+
+    logger.info('Finished cgc_overlap sub-command.')
