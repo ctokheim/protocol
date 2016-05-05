@@ -46,6 +46,11 @@ def main(opts):
     # save output
     mlfc_path = os.path.join(opts['output'], 'mlfc_scores.txt')
     mlfc_series.to_csv(mlfc_path, sep='\t')
-    logger.info('Finished p-value sub-command.')
 
+    if opts['plot']:
+        import plot_data
+        mlfc_path = os.path.join(opts['output'], 'mlfc_scores.pdf')
+        plot_data.mlfc_score(mlfc_series, mlfc_path)
+
+    logger.info('Finished p-value sub-command.')
     return mlfc_result

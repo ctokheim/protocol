@@ -147,3 +147,17 @@ def cgc_overlap(cgc_overlap_df, path):
     # save plot
     plt.tight_layout()
     plt.savefig(path)
+
+
+def mlfc_score(mlfc, path):
+    mlfc.sort_values(inplace=True, ascending=False)
+    with sns.axes_style('ticks'), sns.plotting_context('talk', font_scale=1.5):
+        sns.barplot(mlfc.index, mlfc, color='black')
+        sns.despine()
+        plt.gca().set_xticklabels(mlfc.index, rotation=45, ha='right')
+        plt.ylabel('MLFC')
+        plt.gcf().set_size_inches(7, 7)
+        plt.gca().tick_params(axis='x', which='major', pad=0)
+
+    plt.tight_layout()
+    plt.savefig(path)
