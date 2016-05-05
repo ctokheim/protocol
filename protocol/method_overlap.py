@@ -31,7 +31,7 @@ def method_overlap_count(signif_genes, gene_counts):
         num_uniq = len([x for x in method_cts if x==0])
         num_one = len([x for x in method_cts if x==1])
         num_two = len([x for x in method_cts if x==2])
-        num_three = len([x for x in method_cts if x==3])
+        num_three = len([x for x in method_cts if x>=3])
         num_total = len(method_cts)
 
         # append result
