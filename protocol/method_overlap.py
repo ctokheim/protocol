@@ -54,6 +54,14 @@ def main(opts):
                                                 config)
     num_methods = len(signif_dict)
 
+    # eliminate any excluded methods
+    if utils.is_valid_config(config, 'exclude', 'method_overlap'):
+        exclude_methods = config['exclude']['method_overlap']
+        meth_list = list(signif_dict.keys())
+        for meth in meth_list:
+            if meth in exclude_methods:
+                del signif_dict[meth]
+
     # count how many time each gene is significant
     gene_cts = Counter([g for method in signif_dict for g in signif_dict[method]])
     gene_overlap_df = gene_overlap_count(gene_cts, num_methods)
