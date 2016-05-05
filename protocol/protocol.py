@@ -225,8 +225,10 @@ def main(opts):
         consistency.main(opts)
 
 
-if __name__ == '__main__':
+def cli_main():
     opts = parse_arguments()
     main(opts)
 
 
+if __name__ == '__main__':
+    cli_main()
