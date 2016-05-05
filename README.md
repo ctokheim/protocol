@@ -12,8 +12,6 @@ Using the python package installation, all the required python packages will aut
 
 To install the package into python you can use `pip`. If you are installing to a system wide python then you may need to use `sudo` before the pip command.
 
-.. code-block:: bash
-
 ```bash
 $ pip install https://github.com/KarchinLab/protocol/archive/v1.0.0.tar.gz 
 ```
