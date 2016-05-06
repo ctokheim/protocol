@@ -1,6 +1,6 @@
 numpy
 scipy
-pandas
+pandas>=0.17.0
 PyYAML
 matplotlib
-seaborn
+seaborn>=0.7.0

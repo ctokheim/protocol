@@ -35,7 +35,7 @@ Local installation is a good option if you do not have privilege to install a py
 * pandas>=0.17.0
 * PyYAML
 * matplotlib (optional, for plotting)
-* seaborn (optional, for plotting)
+* seaborn>=0.7.0 (optional, for plotting)
 
 If you don't have the above required packages, you will need to install them. For the following commands to work you will need [pip](http://pip.readthedocs.org/en/latest/installing.html). If you are using a system wide python, you will need to use `sudo` before the pip command.
 
