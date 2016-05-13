@@ -96,6 +96,23 @@ def read_method_overlap_genes(path, min_methods):
     return gene_list
 
 
+def process_cgc(path):
+    """Get the list of CGC genes with small somatic variants."""
+    # read in data
+    df = pd.read_table(path)
+
+    # keep small somatic variants
+    s = df['Mutation Types']
+    is_small = s.str.contains('Mis|F|N|S').fillna(False)
+    is_somatic = ~df['Tumour Types(Somatic)'].isnull()
+    df = df[is_small & is_somatic].copy()
+
+    # get gene names
+    cgc_genes = df['Gene Symbol'].tolist()
+
+    return cgc_genes
+
+
 def fetch_raw_dataframes(input_dir):
     data_dict = {}
     for method_file in os.listdir(input_dir):
@@ -110,13 +127,22 @@ def fetch_raw_dataframes(input_dir):
     return data_dict
 
 
-def fetch_filtered_dataframes(input_dir, output_dir, min_methods):
+def fetch_filtered_dataframes(input_dir, output_dir, min_methods, cgc_path=None):
+    """Return the result files for each method as a dataframe, but with certain
+    genes filtered out. This includes those agreed upon by some minimum
+    number of methods or from the CGC.
+    """
     # get the raw results
     df_dict = fetch_raw_dataframes(input_dir)
 
     # get the overlapping genes
     overlap_path = os.path.join(output_dir, 'gene_overlap_counts.txt')
     overlap_genes = read_method_overlap_genes(overlap_path, min_methods)
+
+    # add in cgc genes, if available
+    if cgc_path is not None:
+        cgc_genes = process_cgc(cgc_path)
+        overlap_genes = list(set(overlap_genes + cgc_genes))
 
     # iterate over each method
     for method in df_dict:

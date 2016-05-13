@@ -143,6 +143,11 @@ def parse_arguments():
             major_parser.add_argument('-m', '--min',
                                       type=int, default=3,
                                       help=help_str)
+            help_str = ('Path to Cancer Gene Census file (optional). Additionaly '
+                        'removes genes from the CGC.')
+            major_parser.add_argument('-c', '--cgc',
+                                      type=str, default=None,
+                                      help=help_str)
             help_str = 'Generate plots examining evaluation (Default: False)'
             advance_parser.add_argument('-p', '--plot',
                                         action='store_true', default=False,
