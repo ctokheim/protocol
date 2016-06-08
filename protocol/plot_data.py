@@ -113,6 +113,7 @@ def method_overlap(overlap_df, path):
 
     plt.tight_layout()
     plt.savefig(path, bbox_extra_artists=(lgd,), bbox_inches='tight')
+    plt.close()
 
 
 def cgc_overlap(cgc_overlap_df, path):
@@ -147,6 +148,7 @@ def cgc_overlap(cgc_overlap_df, path):
     # save plot
     plt.tight_layout()
     plt.savefig(path)
+    plt.close()
 
 
 def mlfc_score(mlfc, path):
@@ -161,6 +163,7 @@ def mlfc_score(mlfc, path):
 
     plt.tight_layout()
     plt.savefig(path)
+    plt.close()
 
 
 def num_signif(num_genes, path):
@@ -175,6 +178,7 @@ def num_signif(num_genes, path):
 
     plt.tight_layout()
     plt.savefig(path)
+    plt.close()
 
 
 def consistency(consis_df, depth, path):
@@ -205,3 +209,4 @@ def consistency(consis_df, depth, path):
     plt.gcf().set_size_inches(7, 7)
     plt.tight_layout()
     plt.savefig(path)
+    plt.close()
