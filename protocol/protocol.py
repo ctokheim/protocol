@@ -1,6 +1,7 @@
 import sys
 import argparse
 import utils
+import os
 import logging
 
 logger = logging.getLogger(__name__)  # module logger
@@ -199,6 +200,11 @@ def parse_arguments():
 
 
 def main(opts):
+    # make output directory if it doesn't exist
+    if not os.path.exists(opts['output']):
+        os.makedirs(opts['output'])
+
+    # run commands
     if opts['kind'] == 'pipeline':
         import cgc_overlap
         import method_overlap
