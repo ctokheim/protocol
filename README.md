@@ -18,7 +18,7 @@ A major goal of the huge public investment in large-scale cancer sequencing has 
 
 Releases can be found on github at
 
-* [http://github.com/KarchinLab/HotMAPS/releases](http://github.com/KarchinLab/HotMAPS/releases)
+* [http://github.com/KarchinLab/protocol/releases](http://github.com/KarchinLab/protocol/releases)
 
 ## Platform
 
