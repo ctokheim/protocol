@@ -94,9 +94,9 @@ def method_overlap(overlap_df, path):
 
             # Finishing touches
             lgd = plt.legend(bbox_to_anchor=(1, .75), loc='upper left',
-                             ncol=1, title='Overlapping\nmethods')
+                             ncol=1, title='Additional\nmethods')
             plt.ylim((0, 1))
-            plt.ylabel('Fraction Overlap (methods)')
+            plt.ylabel('Fraction of predicted drivers')
             plt.gca().set_xticklabels(mymethods, rotation=45, ha='right')
             fig = plt.gcf()
             fig.set_size_inches(7, 7)
@@ -138,7 +138,7 @@ def cgc_overlap(cgc_overlap_df, path):
 
         # fiddle with formatting
         ax.set_xlabel('Methods')
-        ax.set_ylabel('Fraction overlap (CGC)')
+        ax.set_ylabel('Fraction of predicted drivers\nfound in CGC')
         sns.despine()
         plt.xticks(rotation=45, ha='right', va='top')
         plt.gcf().set_size_inches(7, 7)
@@ -157,9 +157,10 @@ def mlfc_score(mlfc, path):
         sns.barplot(mlfc.index, mlfc, color='black')
         sns.despine()
         plt.gca().set_xticklabels(mlfc.index, rotation=45, ha='right')
-        plt.ylabel('MLFC')
+        plt.ylabel('Mean Log2 Fold Change')
         plt.gcf().set_size_inches(7, 7)
         plt.gca().tick_params(axis='x', which='major', pad=0)
+        plt.title('P-value divergence from uniform')
 
     plt.tight_layout()
     plt.savefig(path)
@@ -204,6 +205,7 @@ def consistency(consis_df, depth, path):
             sns.despine()
             ax = plt.gca()
             plt.gca().tick_params(axis='x', which='major', pad=0)
+            plt.title('Consistency')
 
     # save output
     plt.gcf().set_size_inches(7, 7)
