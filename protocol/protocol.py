@@ -37,7 +37,7 @@ def parse_arguments():
                                          help='Splits mutations in a MAF-like format into two random halves',
                                          description='Splits mutations in a MAF-like format into two random halves. '
                                          'Each split maintains the proportion of samples in each cancer type.')
-    parser_cgc = subparsers.add_parser('cgc_overlap',
+    parser_cgc = subparsers.add_parser('list_overlap',
                                        help='Evaluate the overlap of significant genes with the Cancer Gene Census (CGC)',
                                        description='Evaluate the overlap of significant genes with the Cancer Gene Census (CGC)')
     parser_ovlp = subparsers.add_parser('method_overlap',
@@ -81,10 +81,15 @@ def parse_arguments():
                                   help=help_str)
 
         if i == 0:
+            list_parser = major_parser.add_mutually_exclusive_group(required=True)
             help_str = 'Path to Cancer Gene Census file'
-            major_parser.add_argument('-c', '--cgc',
-                                      type=str, required=True,
-                                      help=help_str)
+            list_parser.add_argument('-c', '--cgc',
+                                     type=str, default=None,
+                                     help=help_str)
+            help_str = 'Custom driver gene list'
+            list_parser.add_argument('-g', '--gene-list',
+                                     type=str, default=None,
+                                     help=help_str)
             help_str = ('Minimum number of methods finding a gene significant to '
                         'not include that gene\' p-value (Default: 3)')
             major_parser.add_argument('-m', '--min',
@@ -117,10 +122,15 @@ def parse_arguments():
                                         type=int, default=10,
                                         help=help_str)
         elif i == 2:
+            list_parser = major_parser.add_mutually_exclusive_group(required=True)
             help_str = 'Path to Cancer Gene Census file'
-            major_parser.add_argument('-c', '--cgc',
-                                      type=str, required=True,
-                                      help=help_str)
+            list_parser.add_argument('-c', '--cgc',
+                                     type=str, default=None,
+                                     help=help_str)
+            help_str = 'Custom driver gene list'
+            list_parser.add_argument('-g', '--gene-list',
+                                     type=str, default=None,
+                                     help=help_str)
             help_str = 'Q-value threshold for significance (Default: 0.1)'
             advance_parser.add_argument('-q', '--qvalue',
                                         type=float, default=.1,
@@ -219,7 +229,7 @@ def main(opts):
     elif opts['kind'] == 'split_mutations':
         import split_mutations
         split_mutations.main(opts)
-    elif opts['kind'] == 'cgc_overlap':
+    elif opts['kind'] == 'list_overlap':
         import cgc_overlap
         cgc_overlap.main(opts)
     elif opts['kind'] == 'method_overlap':

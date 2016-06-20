@@ -116,7 +116,7 @@ def method_overlap(overlap_df, path):
     plt.close()
 
 
-def cgc_overlap(cgc_overlap_df, path):
+def cgc_overlap(cgc_overlap_df, path, list_name='CGC'):
     # Function to label bars
     def autolabel(rects):
         # attach some text labels
@@ -126,11 +126,11 @@ def cgc_overlap(cgc_overlap_df, path):
                      ha='center', va='bottom', size=16)
 
     # plot barplot
-    mymethods = cgc_overlap_df.sort('Fraction overlap (CGC)').index.tolist()
-    name = cgc_overlap_df.ix[mymethods]['# CGC'].tolist()
+    mymethods = cgc_overlap_df.sort('Fraction overlap ({0})'.format(list_name)).index.tolist()
+    name = cgc_overlap_df.ix[mymethods]['# '+list_name].tolist()
     with sns.axes_style('ticks'), sns.plotting_context('talk', font_scale=1.5):
         ax = sns.barplot(cgc_overlap_df.index,
-                         cgc_overlap_df['Fraction overlap (CGC)'],
+                         cgc_overlap_df['Fraction overlap ({0})'.format(list_name)],
                          order=mymethods, color='black')
 
         # label each bar
@@ -138,7 +138,7 @@ def cgc_overlap(cgc_overlap_df, path):
 
         # fiddle with formatting
         ax.set_xlabel('Methods')
-        ax.set_ylabel('Fraction of predicted drivers\nfound in CGC')
+        ax.set_ylabel('Fraction of predicted drivers\nfound in '+list_name)
         sns.despine()
         plt.xticks(rotation=45, ha='right', va='top')
         plt.gcf().set_size_inches(7, 7)
