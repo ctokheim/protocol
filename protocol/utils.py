@@ -60,6 +60,7 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
 
 
 def fetch_significant_genes(input_dir, qval, config):
+    """Read the significant driver genes for each method."""
     signif_dict = {}
     for method_file in os.listdir(input_dir):
         method_name = os.path.splitext(method_file)[0]
@@ -74,12 +75,27 @@ def fetch_significant_genes(input_dir, qval, config):
         else:
             qval_cols = ['qvalue']
 
-        tmp_genes = set()
-        for qval_col in qval_cols:
-            # get the significant genes
-            signif_df = df[df[qval_col]<=qval]
-            tmp_genes |= set(signif_df['gene'].tolist())
-        signif_dict[method_name] = list(tmp_genes)
+        # figure out if a custom score or q-value is used
+        if is_valid_config(config, method_name, 'threshold'):
+            score_val = float(config[method_name]['threshold']['score'])
+            tmp_genes = set()
+            for qval_col in qval_cols:
+                # get the top scoring genes
+                top_direction = config[method_name]['threshold']['top']
+                if top_direction == 'low':
+                    signif_df = df[df[qval_col]<=score_val]
+                else:
+                    signif_df = df[df[qval_col]>=score_val]
+                tmp_genes |= set(signif_df['gene'].tolist())
+            signif_dict[method_name] = list(tmp_genes)
+        else:
+            # use q-value for threshold
+            tmp_genes = set()
+            for qval_col in qval_cols:
+                # get the significant genes
+                signif_df = df[df[qval_col]<=qval]
+                tmp_genes |= set(signif_df['gene'].tolist())
+            signif_dict[method_name] = list(tmp_genes)
     return signif_dict
 
 
