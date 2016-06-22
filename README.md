@@ -22,7 +22,7 @@ Releases can be found on github at
 
 ## Platform
 
-The protocol package should work on any platform.
+The protocol package should work on UNIX platforms (mac os x, linux). It likely will work on windows, but has not been tested (installation instructions may differ).
 
 ## Support
 
