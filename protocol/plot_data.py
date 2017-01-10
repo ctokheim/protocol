@@ -1,50 +1,10 @@
 import numpy as np
+import pandas as pd
 import matplotlib as mpl
 mpl.use('agg')
+mpl.rcParams['pdf.fonttype'] = 42
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-def qqplot(data,
-           ax=None,
-           log=False, title=None,
-           use_xlabel=True, use_ylabel=True,
-           **kwargs):
-    """qq-plot with uniform distribution"""
-    tmp = data.copy()
-    tmp.sort()
-    dist_quant = np.arange(1, len(tmp)+1)/float(len(tmp)+1)
-    if log:
-        log_quant = -np.log10(dist_quant)
-        if ax is None:
-            plt.plot(log_quant, -np.log10(tmp),'o', markersize=3, **kwargs)
-            plt.plot([0, log_quant[0]], [0, log_quant[0]], ls="-", color='red')
-        else:
-            ax.plot(log_quant, -np.log10(tmp),'o', markersize=3, **kwargs)
-            ax.plot([0, log_quant[0]], [0, log_quant[0]], ls="-", color='red')
-        # set axis labels
-        if use_xlabel:
-            if ax is None: plt.xlabel('Theoretical ($-log_{10}(p)$)')
-            else: ax.set_xlabel('Theoretical ($-log_{10}(p)$)')
-        if use_ylabel:
-            if ax is None: plt.ylabel('Observed ($-log_{10}(p)$)')
-            else: ax.set_ylabel('Observed ($-log_{10}(p)$)')
-    else:
-        if ax is None:
-            plt.plot(dist_quant, tmp,'o', markersize=3, **kwargs)
-            plt.plot([0, 1], [0, 1], ls="-", color='red')
-        else:
-            ax.plot(dist_quant, tmp,'o', markersize=3, **kwargs)
-            ax.plot([0, 1], [0, 1], ls="-", color='red')
-            ax.set_ylabel('p-value')
-        if use_xlabel:
-            if ax is None: plt.xlabel('Theoretical Quantile')
-            else: ax.set_xlabel('Theoretical Quantile')
-        if use_ylabel:
-            if ax is None: plt.ylabel('Observed Quantile')
-            else: ax.set_ylabel('Observed Quantile')
-    if title:
-        ax.set_title(title)
-    sns.despine()
 
 
 def multi_qqplot(data, max_pval=1.0):
@@ -73,6 +33,135 @@ def multi_qqplot(data, max_pval=1.0):
         for myax in g.axes:
             myax.set_xlim((0, max_pval))
             myax.set_ylim((0, max_pval))
+
+
+def fix_formatting(ax, title, remove_xlab=True, remove_ylab=False):
+    """simple function to set title and remove xlabel"""
+    ax.set_title(title)
+    if remove_xlab:
+        ax.set_xlabel('')
+    if remove_ylab:
+        ax.set_ylabel('')
+
+
+def set_axes_label(fig, xlab, ylab,
+                   ylab_yoffset=.55, ylab_xoffset=0.04,
+                   xlab_yoffset=.04, xlab_xoffset=0.5):
+    txt1 = fig.text(xlab_xoffset, xlab_yoffset, xlab, ha='center', size=22)
+    txt2 = fig.text(ylab_xoffset, ylab_yoffset, ylab, ha='center', size=22, rotation=90)
+    return txt1, txt2
+
+
+def qqplot(data,
+           ax=None,
+           log=False, title=None,
+           use_xlabel=True, use_ylabel=True,
+           **kwargs):
+    """qq-plot with uniform distribution"""
+    tmp = data.copy()
+    tmp.sort()
+    dist_quant = np.arange(1, len(tmp)+1)/float(len(tmp)+1)
+    if log:
+        log_quant = -np.log10(dist_quant)
+        if ax is None:
+            plt.plot(log_quant, -np.log10(tmp),'o', markersize=3, **kwargs)
+            plt.plot([0, log_quant[0]], [0, log_quant[0]], ls="-", color='red')
+        else:
+            ax.plot(log_quant, -np.log10(tmp),'o', markersize=3, **kwargs)
+            ax.plot([0, log_quant[0]], [0, log_quant[0]], ls="-", color='red')
+        # set axis labels
+        if use_xlabel:
+            if ax is None: plt.xlabel('Theoretical (-log10(p))')
+            else: ax.set_xlabel('Theoretical (-log10(p))')
+        if use_ylabel:
+            if ax is None: plt.ylabel('Observed (-log10(p))')
+            else: ax.set_ylabel('Observed (-log10(p))')
+    else:
+        if ax is None:
+            plt.plot(dist_quant, tmp,'o', markersize=3, **kwargs)
+            plt.plot([0, 1], [0, 1], ls="-", color='red')
+        else:
+            ax.plot(dist_quant, tmp,'o', markersize=3, **kwargs)
+            ax.plot([0, 1], [0, 1], ls="-", color='red')
+            ax.set_ylabel('p-value')
+        if use_xlabel:
+            if ax is None: plt.xlabel('Theoretical p-value')
+            else: ax.set_xlabel('Theoretical p-value')
+        if use_ylabel:
+            if ax is None: plt.ylabel('Observed p-value')
+            else: ax.set_ylabel('Observed p-value')
+    if title:
+        ax.set_title(title)
+    sns.despine()
+    return ax
+
+
+def single_method_qqplot(pval_series, filepath):
+    """Perform a qq plot for a single method."""
+    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.5):
+        qqplot(pval_series, log=True)
+        ax = plt.gca()
+        #ax.set_xlim((0, 5)); ax.set_ylim((0, 6))
+        plt.gcf().set_size_inches((3.5,2.5))
+        plt.title('p-value QQ plot')
+        plt.tight_layout()
+        plt.savefig(filepath)
+        plt.close()
+
+
+def single_method_overlap(s, filepath):
+    """Plot overlap with cancer gene census and landscapes list.
+
+    Parameters
+    ----------
+    s : pd.Series
+        contains overlap counts
+    """
+    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.5):
+        ax = sns.barplot(s.index, s, color='black')
+
+        sns.despine()
+        plt.xticks(rotation=45, ha='right', va='top')
+
+        ax.set_ylabel('# of overlapping genes')
+        plt.gcf().set_size_inches(2, 3)
+        plt.tight_layout()
+        plt.savefig(filepath)
+        plt.close()
+
+
+def single_method_driver_per_sample(driver_per_sample, filepath):
+    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.0):
+        driver_list = [pd.DataFrame({'tumor type': ttype, 'type': 'All Driver', '# Per Sample': count})
+                    for ttype, count in driver_per_sample.iteritems()]
+        ttype_df = pd.concat(driver_list)
+        ttype_df['# Per Sample'] = ttype_df['# Per Sample'].astype(int)
+        mean_per_sample = ttype_df.groupby('tumor type')['# Per Sample'].mean()
+        custom_order = mean_per_sample.sort_values().index
+        sns.barplot('tumor type', '# Per Sample', data=ttype_df,
+                    order=custom_order, color=sns.color_palette()[0], ci=95)
+        plt.ylabel('Avg. # mutated drivers per sample')
+        plt.xlabel('')
+        sns.despine()
+        plt.xticks(rotation=90)
+        plt.gcf().set_size_inches((3.5,3.5))
+        plt.tight_layout()
+        plt.savefig(filepath)
+        plt.close()
+    return custom_order
+
+
+def single_method_num_drivers_per_type(gene_ttype_ct, custom_order, filepath):
+    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.0):
+        sns.barplot(custom_order, gene_ttype_ct[custom_order], color='black')
+        plt.xticks(rotation=90)
+        sns.despine()
+        plt.xlabel('cancer type')
+        plt.ylabel('No. of significant genes')
+        plt.gcf().set_size_inches((3.5,3.5))
+        plt.tight_layout()
+        plt.savefig(filepath)
+        plt.close()
 
 
 def method_overlap(overlap_df, path):
