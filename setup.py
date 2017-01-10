@@ -28,6 +28,7 @@ setup(name='protocol',
         entry_points={
             'console_scripts':[
                 'driver_protocol = protocol.protocol:cli_main',
+                'standard_plots = protocol.standard_plots:cli_main',
             ]
         },
         #long_description=open('README.md').read(),

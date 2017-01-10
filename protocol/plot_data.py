@@ -117,7 +117,7 @@ def single_method_overlap(s, filepath):
     s : pd.Series
         contains overlap counts
     """
-    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.5):
+    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.2):
         ax = sns.barplot(s.index, s, color='black')
 
         sns.despine()

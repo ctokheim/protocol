@@ -66,7 +66,10 @@ def parse_arguments():
     parser.add_argument('-config', '--config',
                         type=str, default=None,
                         help=help_str)
-    help_str = 'Q-value threshold for significance (Default: 0.1)'
+    help_str = ('Q-value threshold for significance (Default: 0.1). '
+                'This option is only specified if you do not include a threshold in '
+                'the config file. The value in the configuration file will take '
+                'precedence.')
     parser.add_argument('-q', '--qvalue',
                         type=float, default=.1,
                         help=help_str)
@@ -164,8 +167,8 @@ def main(opts):
     intersect_cgc = len(pancan_genes & set(cgc))
     intersect_landscapes = len(pancan_genes & set(landscapes))
     intersect_all = len(pancan_genes & (set(cgc) | set(landscapes)))
-    s = pd.Series([intersect_cgc, intersect_landscapes, intersect_all],
-                   index=['CGC', 'Landscapes', 'All'])
+    s = pd.Series([intersect_cgc, intersect_landscapes, intersect_all, len(pancan_genes)],
+                   index=['CGC', 'Landscapes', 'Either', 'Method Total'])
     out_path = os.path.join(opts['output'], 'gene_list_overlap.pdf')
     plot_data.single_method_overlap(s, out_path)
     logger.info('Finished')
