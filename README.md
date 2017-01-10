@@ -10,9 +10,24 @@ A major goal of the huge public investment in large-scale cancer sequencing has 
 * [Installation](http://github.com/KarchinLab/protocol/wiki/Installation)
 * [Tutorial](http://github.com/KarchinLab/protocol/wiki/Tutorial)
 
-## Releases
+## Configuration file
 
-* protocol-1.0.0 Initial release
+Often methods will have different column names for the p-value/q-values. By default these will assume the p-value column name is "pvalue", and the q-value column names is "qvalue". This can be changed through a YAML configuration file. We have already provided you with a template configuration file (config.yaml) in the repository. Although, this file can be tweaked and/or further extended for additional methods. The configuration file has the following format:
+
+```yaml
+METHODNAME:
+    qvalue:
+        - qvalCol1
+        - qvalCol2
+    pvalue:
+        - pvalCol1
+        - pvalCol2
+    threshold
+        score: 0.1
+        top: low
+```
+
+METHODNAME is the name of the method, which should match the file naming convention described in the data format above. In this example, the method reports two p-values (column names: "pvalCol1" and "pvalCol2") and two q-values (column names: "qvalCol1" and "qvalCol2"). In the common case that a method reports one p-value/q-value column, then only one bullet point for each attribute would be needed. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low").
 
 ## Availability
 
