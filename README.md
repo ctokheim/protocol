@@ -4,11 +4,16 @@
 
 A major goal of the huge public investment in large-scale cancer sequencing has been to find the majority of driver genes.  Robust computational prediction of drivers from small somatic variants is critical to this mission, and it is essential that the best methods be identified.  While many such methods have been proposed, it has been difficult to evaluate them because there is no gold standard to use as a benchmark.  Here we developed an evaluation framework for driver gene prediction methods that does not require a gold standard.  The framework includes a large set of small somatic mutations from a wide range of cancer types and five evaluation metrics.  We propose it can be used to systematically evaluate new prediction methods and compare them to existing methods.  
 
-## Links
+## Installation
 
-* [Documentation Wiki](http://github.com/KarchinLab/protocol/wiki/Home)
-* [Installation](http://github.com/KarchinLab/protocol/wiki/Installation)
-* [Tutorial](http://github.com/KarchinLab/protocol/wiki/Tutorial)
+You can pip install the package:
+
+```bash
+$ pip install git+git://github.com/ctokheim/protocol.git
+$ standard_plots --help
+```
+
+The required python packages are shown in the [requirements_plotting.txt](https://github.com/ctokheim/protocol/blob/master/requirements_plotting.txt) file.
 
 ## Configuration file
 
@@ -22,12 +27,12 @@ METHODNAME:
     pvalue:
         - pvalCol1
         - pvalCol2
-    threshold
+    threshold:
         score: 0.1
         top: low
 ```
 
-METHODNAME is the name of the method, which should match the file naming convention described in the data format above. In this example, the method reports two p-values (column names: "pvalCol1" and "pvalCol2") and two q-values (column names: "qvalCol1" and "qvalCol2"). In the common case that a method reports one p-value/q-value column, then only one bullet point for each attribute would be needed. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low").
+METHODNAME is the name of the method, which should match the method name provided through the command line argument. In this example, the method reports two p-values (column names: "pvalCol1" and "pvalCol2") and two q-values (column names: "qvalCol1" and "qvalCol2"). In the common case that a method reports one p-value/q-value column, then only one bullet point for each attribute would be needed. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low").
 
 ## Availability
 
