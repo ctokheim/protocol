@@ -1,9 +1,5 @@
 # Protocol
 
-## About
-
-A major goal of the huge public investment in large-scale cancer sequencing has been to find the majority of driver genes.  Robust computational prediction of drivers from small somatic variants is critical to this mission, and it is essential that the best methods be identified.  While many such methods have been proposed, it has been difficult to evaluate them because there is no gold standard to use as a benchmark.  Here we developed an evaluation framework for driver gene prediction methods that does not require a gold standard.  The framework includes a large set of small somatic mutations from a wide range of cancer types and five evaluation metrics.  We propose it can be used to systematically evaluate new prediction methods and compare them to existing methods.  
-
 ## Installation
 
 You can pip install the package:
@@ -14,6 +10,21 @@ $ standard_plots --help
 ```
 
 The required python packages are shown in the [requirements_plotting.txt](https://github.com/ctokheim/protocol/blob/master/requirements_plotting.txt) file.
+
+## Data files
+
+### method results
+
+All results of a method should be stored in the same directory. Files should be named by cancer type or PANCAN for pan-cancer results. For example, pancancer should be PANCAN.txt and LUAD.txt for lung adenocarcinoma. The files are assumed to be tab-separated.
+
+### gene lists
+
+There are two gene lists: Cancer gene census and cancer genome landscapes. 
+
+```bash
+$ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/Census_allSat%20Jan%20%207%2018-57-49%202017.tsv
+$ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/cancer_genome_landscapes.txt
+```
 
 ## Configuration file
 
