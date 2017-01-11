@@ -15,7 +15,7 @@ The required python packages are shown in the [requirements_plotting.txt](https:
 
 ### method results
 
-All results of a method should be stored in the same directory. Files should be named by cancer type or PANCAN for pan-cancer results. For example, pancancer should be PANCAN.txt and LUAD.txt for lung adenocarcinoma. The files are assumed to be tab-separated.
+All results of a method should be stored in the same directory (specified by `--input-dir` option). Files should be named by cancer type or PANCAN for pan-cancer results. For example, pancancer should be PANCAN.txt and LUAD.txt for lung adenocarcinoma. The files are assumed to be tab-separated.
 
 ### gene lists
 
