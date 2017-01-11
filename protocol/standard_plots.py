@@ -192,7 +192,13 @@ def main(opts):
     if not signif_dict:
         return
     # process maf file
-    mut_df = pd.read_table(opts['mutations'])
+    useful_cols = ['Hugo_Symbol', 'Chromosome', 'Start_Position',
+                   'End_Position', 'Strand', 'Variant_Classification',
+                   'Variant_Type', 'Reference_Allele', 'Tumor_Seq_Allele1',
+                   'Tumor_Seq_Allele2', 'Tumor_Sample_Barcode', 'Transcript_ID',
+                   'HGVSp_Short', 'Protein_position', 'CENTERS', 'FILTER', 'Tumor_Type',
+                   't_depth', 't_alt_count']
+    mut_df = pd.read_table(opts['mutations'], usecols=useful_cols)
     drop_variants = ["3'UTR", "5'UTR", "3'Flank", "5'Flank", "RNA", "Intron",]
     mut_df = mut_df[~mut_df['Variant_Classification'].isin(drop_variants)]
     mut_df['is_nonsilent'] = 0

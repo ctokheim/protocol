@@ -101,7 +101,7 @@ def single_method_qqplot(pval_series, filepath):
     with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.5):
         qqplot(pval_series, log=True)
         ax = plt.gca()
-        #ax.set_xlim((0, 5)); ax.set_ylim((0, 6))
+        ax.set_ylim((0, 7))
         plt.gcf().set_size_inches((3.5,2.5))
         plt.title('p-value QQ plot')
         plt.tight_layout()

@@ -2,6 +2,7 @@
 # Configuration for individual methods
 ######################################
 2020+:
+    gene_col: gene
     qvalue:
         - oncogene q-value
         - tsg q-value

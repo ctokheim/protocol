@@ -62,6 +62,7 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
 def fetch_significant_genes(input_dir, qval, config):
     """Read the significant driver genes for each method."""
     signif_dict = {}
+    gene = config[method_name]['gene_col']
     for method_file in os.listdir(input_dir):
         method_name = os.path.splitext(method_file)[0]
 
@@ -86,7 +87,7 @@ def fetch_significant_genes(input_dir, qval, config):
                     signif_df = df[df[qval_col]<=score_val]
                 else:
                     signif_df = df[df[qval_col]>=score_val]
-                tmp_genes |= set(signif_df['gene'].tolist())
+                tmp_genes |= set(signif_df[gene].tolist())
             signif_dict[method_name] = list(tmp_genes)
         else:
             # use q-value for threshold
@@ -94,7 +95,7 @@ def fetch_significant_genes(input_dir, qval, config):
             for qval_col in qval_cols:
                 # get the significant genes
                 signif_df = df[df[qval_col]<=qval]
-                tmp_genes |= set(signif_df['gene'].tolist())
+                tmp_genes |= set(signif_df[gene].tolist())
             signif_dict[method_name] = list(tmp_genes)
     return signif_dict
 
@@ -102,6 +103,7 @@ def fetch_significant_genes(input_dir, qval, config):
 def fetch_single_method_significant_genes(input_dir, method_name, qval, config):
     """Read the significant driver genes for a single method."""
     signif_dict = {}
+    gene = config[method_name]['gene_col']
     for method_file in os.listdir(input_dir):
         cancer_type_name = os.path.splitext(method_file)[0]
 
@@ -126,7 +128,7 @@ def fetch_single_method_significant_genes(input_dir, method_name, qval, config):
                     signif_df = df[df[qval_col]<=score_val]
                 else:
                     signif_df = df[df[qval_col]>=score_val]
-                tmp_genes |= set(signif_df['gene'].tolist())
+                tmp_genes |= set(signif_df[gene].tolist())
             signif_dict[cancer_type_name] = list(tmp_genes)
         else:
             # use q-value for threshold
@@ -134,7 +136,7 @@ def fetch_single_method_significant_genes(input_dir, method_name, qval, config):
             for qval_col in qval_cols:
                 # get the significant genes
                 signif_df = df[df[qval_col]<=qval]
-                tmp_genes |= set(signif_df['gene'].tolist())
+                tmp_genes |= set(signif_df[gene].tolist())
             signif_dict[cancer_type_name] = list(tmp_genes)
     return signif_dict
 
@@ -195,6 +197,9 @@ def fetch_filtered_dataframes(input_dir, output_dir, min_methods, cgc_path=None)
     overlap_path = os.path.join(output_dir, 'gene_overlap_counts.txt')
     overlap_genes = read_method_overlap_genes(overlap_path, min_methods)
 
+    # gene column name
+    gene = config[method_name]['gene_col']
+
     # add in cgc genes, if available
     if cgc_path is not None:
         cgc_genes = process_cgc(cgc_path)
@@ -204,7 +209,7 @@ def fetch_filtered_dataframes(input_dir, output_dir, min_methods, cgc_path=None)
     for method in df_dict:
         # filter out agreed upon genes
         df_copy = df_dict[method].copy()
-        df_copy = df_copy[~df_copy['gene'].isin(overlap_genes)]
+        df_copy = df_copy[~df_copy[gene].isin(overlap_genes)]
 
         # update dictionary
         df_dict[method] = df_copy
