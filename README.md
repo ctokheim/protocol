@@ -45,12 +45,6 @@ METHODNAME:
 
 METHODNAME is the name of the method, which should match the method name provided through the command line argument. In this example, the method reports two p-values (column names: "pvalCol1" and "pvalCol2") and two q-values (column names: "qvalCol1" and "qvalCol2"). In the common case that a method reports one p-value/q-value column, then only one bullet point for each attribute would be needed. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low").
 
-## Availability
-
-Releases can be found on github at
-
-* [http://github.com/KarchinLab/protocol/releases](http://github.com/KarchinLab/protocol/releases)
-
 ## Platform
 
 The protocol package should work on UNIX platforms (mac os x, linux). It likely will work on windows, but has not been tested (installation instructions may differ).
