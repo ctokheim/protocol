@@ -122,6 +122,7 @@ def get_avg_drivers(df_dict, sig_genes):
 
         # count number of driver genes with non-silent mutations
         if type(sig_genes) is dict:
+            if ttype not in sig_genes: continue
             df_tmp = df[df['Hugo_Symbol'].isin(sig_genes[ttype])]
         else:
             df_tmp = df[df['Hugo_Symbol'].isin(sig_genes)]
