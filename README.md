@@ -32,6 +32,7 @@ Often methods will have different column names for the p-value/q-values. By defa
 
 ```yaml
 METHODNAME:
+    gene_col: gene
     qvalue:
         - qvalCol1
         - qvalCol2
@@ -43,7 +44,7 @@ METHODNAME:
         top: low
 ```
 
-METHODNAME is the name of the method, which should match the method name provided through the command line argument. In this example, the method reports two p-values (column names: "pvalCol1" and "pvalCol2") and two q-values (column names: "qvalCol1" and "qvalCol2"). In the common case that a method reports one p-value/q-value column, then only one bullet point for each attribute would be needed. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low").
+METHODNAME is the name of the method, which should match the method name provided through the command line argument. You can change the column name containing the gene name from "gene" to the column name of your method's result file. In this example, the method reports two p-values (column names: "pvalCol1" and "pvalCol2") and two q-values (column names: "qvalCol1" and "qvalCol2"). In the common case that a method reports one p-value/q-value column, then only one bullet point for each attribute would be needed. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low").
 
 ## Platform
 
