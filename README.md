@@ -1,7 +1,7 @@
 # Protocol
 
 This code is meant to perform basic plots for driver gene prediction methods that specifically report a p-value.
-It generates plots for overlap with various gene lists (CGC, cancer genome landscapes, kandoth et al. pancan12, and tamborero et al. pancan12 high confidence drivers), p-value qq plot, average number of non-silent mutated driver genes per sample, and number of significant driver genes per cancer type.
+It generates plots for overlap with various gene lists (CGC, cancer genome landscapes, kandoth et al. pancan12, and tamborero et al. pancan12 high confidence drivers), p-value qq plot, average number of non-silent mutated driver genes per sample, and number of significant driver genes per cancer type. This is a work in progress, and suggestions are appreciated.
 
 ## Installation
 
