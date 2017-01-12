@@ -67,6 +67,7 @@ def fetch_significant_genes(input_dir, qval, config):
     else:
         gene = 'gene'
     for method_file in os.listdir(input_dir):
+        if not method_file.endswith('.txt'): continue
         method_name = os.path.splitext(method_file)[0]
 
         # read in data
@@ -111,6 +112,7 @@ def fetch_single_method_significant_genes(input_dir, method_name, qval, config):
     else:
         gene = 'gene'
     for method_file in os.listdir(input_dir):
+        if not method_file.endswith('.txt'): continue
         cancer_type_name = os.path.splitext(method_file)[0]
 
         # read in data
