@@ -58,8 +58,16 @@ def parse_arguments():
     parser.add_argument('-c', '--cgc',
                         type=str, default=None,
                         help=help_str)
-    help_str = 'Landscapes driver gene list'
+    help_str = 'Cancer genome landscapes driver gene list'
     parser.add_argument('-landscapes', '--landscapes',
+                        type=str, default=None,
+                        help=help_str)
+    help_str = 'List of Pancan12 drivers from Kandoth et al.'
+    parser.add_argument('-k', '--kandoth',
+                        type=str, default=None,
+                        help=help_str)
+    help_str = 'List of High confidence Pancan12 drivers from Tamborero et al.'
+    parser.add_argument('-hcd', '--high-confidence-list',
                         type=str, default=None,
                         help=help_str)
     help_str = 'Configuration file (YAML format)'
@@ -150,6 +158,8 @@ def main(opts):
     # run commands
     cgc = utils.process_cgc(opts['cgc'])
     landscapes = cgc_overlap.read_custom_list(opts['landscapes'])
+    kandoth = cgc_overlap.read_custom_list(opts['kandoth'])
+    tamborero = cgc_overlap.read_custom_list(opts['high_confidence_list'])
 
     # get significant genes
     signif_dict = utils.fetch_single_method_significant_genes(opts['input_dir'],
@@ -163,13 +173,15 @@ def main(opts):
     # Pan-cancer plots
     ###########################
     # overlap with gene lists
-    logger.info('Overlapping genes with CGC and Cancer Genome Landscapes . . .')
+    logger.info('Overlapping genes with CGC, Cancer Genome Landscapes, kandoth et al, and tamborero et al. . . .')
     pancan_genes = set(signif_dict['PANCAN'])
     intersect_cgc = len(pancan_genes & set(cgc))
     intersect_landscapes = len(pancan_genes & set(landscapes))
-    intersect_all = len(pancan_genes & (set(cgc) | set(landscapes)))
-    s = pd.Series([intersect_cgc, intersect_landscapes, intersect_all, len(pancan_genes)],
-                   index=['CGC', 'Landscapes', 'Either', 'Method Total'])
+    intersect_kandoth = len(pancan_genes & set(kandoth))
+    intersect_tamborero = len(pancan_genes & set(tamborero))
+    intersect_all = len(pancan_genes & (set(cgc) | set(landscapes) | set(kandoth) | set(tamborero)))
+    s = pd.Series([intersect_cgc, intersect_landscapes, intersect_kandoth, intersect_tamborero, intersect_all, len(pancan_genes)],
+                   index=['CGC', 'Landscapes', 'Kandoth et al.', 'Tamborero et al.', 'Any list', 'Method Total'])
     out_path = os.path.join(opts['output'], 'gene_list_overlap.pdf')
     plot_data.single_method_overlap(s, out_path)
     logger.info('Finished')
