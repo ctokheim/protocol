@@ -19,11 +19,13 @@ All results of a method should be stored in the same directory (specified by `--
 
 ### gene lists
 
-There are two gene lists: Cancer gene census and cancer genome landscapes. 
+There are four gene lists: Cancer gene census, cancer genome landscapes, Kandoth et al Pancan12 smgs, and the Tamborero et al Pancan12 high confidence drivers (HCD). 
 
 ```bash
 $ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/Census_allSat%20Jan%20%207%2018-57-49%202017.tsv
 $ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/cancer_genome_landscapes.txt
+$ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/hcd_pancan12.txt
+$ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/kandoth_pancan12_smgs.txt
 ```
 
 ## Configuration file
