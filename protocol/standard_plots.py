@@ -46,7 +46,7 @@ def parse_arguments():
     parser.add_argument('-m', '--mutations',
                         type=str, required=True,
                         help=help_str)
-    help_str = 'Method name (should be same as listed inside config.yaml))'
+    help_str = 'Method name (should be same as listed inside config.yaml)'
     parser.add_argument('-n', '--method-name',
                         type=str, required=True,
                         help=help_str)

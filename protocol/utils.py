@@ -62,7 +62,10 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
 def fetch_significant_genes(input_dir, qval, config):
     """Read the significant driver genes for each method."""
     signif_dict = {}
-    gene = config[method_name]['gene_col']
+    if is_valid_config(config, method_name, 'gene_col'):
+        gene = config[method_name]['gene_col']
+    else:
+        gene = 'gene'
     for method_file in os.listdir(input_dir):
         method_name = os.path.splitext(method_file)[0]
 
@@ -103,7 +106,10 @@ def fetch_significant_genes(input_dir, qval, config):
 def fetch_single_method_significant_genes(input_dir, method_name, qval, config):
     """Read the significant driver genes for a single method."""
     signif_dict = {}
-    gene = config[method_name]['gene_col']
+    if is_valid_config(config, method_name, 'gene_col'):
+        gene = config[method_name]['gene_col']
+    else:
+        gene = 'gene'
     for method_file in os.listdir(input_dir):
         cancer_type_name = os.path.splitext(method_file)[0]
 
@@ -198,7 +204,10 @@ def fetch_filtered_dataframes(input_dir, output_dir, min_methods, cgc_path=None)
     overlap_genes = read_method_overlap_genes(overlap_path, min_methods)
 
     # gene column name
-    gene = config[method_name]['gene_col']
+    if is_valid_config(config, method_name, 'gene_col'):
+        gene = config[method_name]['gene_col']
+    else:
+        gene = 'gene'
 
     # add in cgc genes, if available
     if cgc_path is not None:

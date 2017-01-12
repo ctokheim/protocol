@@ -30,7 +30,7 @@ $ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/kandoth_p
 
 ## Configuration file
 
-Often methods will have different column names for the p-value/q-values. By default these will assume the p-value column name is "pvalue", and the q-value column names is "qvalue". This can be changed through a YAML configuration file. We have already provided you with a template configuration file (config.yaml) in the repository. Although, this file can be tweaked and/or further extended for additional methods. The configuration file has the following format:
+Often methods will have different column names for the gene names, p-values, and q-values. By default these will assume the gene name column is "gene", thep-value column name is "pvalue", and the q-value column name is "qvalue". This can be changed through a YAML configuration file. We have already provided you with a template configuration file (config.yaml) in the repository. Although, this file can be tweaked and/or further extended for additional methods. The configuration file has the following format:
 
 ```yaml
 METHODNAME:
