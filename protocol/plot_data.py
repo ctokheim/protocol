@@ -242,13 +242,14 @@ def cgc_overlap(cgc_overlap_df, path, list_name='CGC'):
 
 def mlfc_score(mlfc, path):
     mlfc.sort_values(inplace=True, ascending=False)
-    with sns.axes_style('ticks'), sns.plotting_context('talk', font_scale=1.5):
+    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=.9):
         sns.barplot(mlfc.index, mlfc, color='black')
         sns.despine()
-        plt.gca().set_xticklabels(mlfc.index, rotation=45, ha='right')
+        #plt.gca().set_xticklabels(mlfc.index, rotation=45, ha='right')
+        plt.gca().set_xticklabels(mlfc.index, rotation=90)
         plt.ylabel('Mean Log2 Fold Change')
-        plt.gcf().set_size_inches(7, 7)
-        plt.gca().tick_params(axis='x', which='major', pad=0)
+        plt.gcf().set_size_inches(3.5, 3.5)
+        #plt.gca().tick_params(axis='x', which='major', pad=0)
         plt.title('P-value divergence from uniform')
 
     plt.tight_layout()

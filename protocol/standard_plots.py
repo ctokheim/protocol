@@ -235,6 +235,17 @@ def main(opts):
     plot_data.single_method_num_drivers_per_type(signif_ct, order, out_path)
     logger.info('Finished.')
 
+    # plot the MLFC scores
+    logger.info('Analyzing the divergence of p-values from expectations . . .')
+    pval_dict = utils.read_filtered_pvalues(opts['input_dir'], cgc,
+                                            config, opts['method_name'])
+    mlfc_dict = {t: p_value.calculate_mlfc(pval_dict[t], opts['method_name'], config)
+                 for t in pval_dict}
+    mlfc_series = pd.Series(mlfc_dict)
+    out_path = os.path.join(opts['output'], 'cancer_type_mlfc.pdf')
+    plot_data.mlfc_score(mlfc_series, out_path)
+    logger.info('Finished.')
+
 
 def cli_main():
     opts = parse_arguments()
