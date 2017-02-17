@@ -144,6 +144,7 @@ def fetch_single_method_significant_genes(input_dir, method_name, qval, config):
         gene = 'gene'
     for method_file in os.listdir(input_dir):
         if not method_file.endswith('.txt'): continue
+        if method_file.upper().startswith('README'): continue
         cancer_type_name = os.path.splitext(method_file)[0]
 
         # read in data
@@ -214,6 +215,9 @@ def fetch_raw_dataframes(input_dir):
     data_dict = {}
     for method_file in os.listdir(input_dir):
         method_name = os.path.splitext(method_file)[0]
+
+        # skip READMEs
+        if method_name.upper().startswith('README'): continue
 
         # read in data
         full_path = os.path.join(input_dir, method_file)
