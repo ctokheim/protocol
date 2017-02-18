@@ -122,19 +122,27 @@ def parse_arguments():
                                         type=int, default=10,
                                         help=help_str)
         elif i == 2:
-            list_parser = major_parser.add_mutually_exclusive_group(required=True)
+            #list_parser = major_parser.add_mutually_exclusive_group(required=True)
             help_str = 'Path to Cancer Gene Census file'
-            list_parser.add_argument('-c', '--cgc',
-                                     type=str, default=None,
-                                     help=help_str)
+            major_parser.add_argument('-c', '--cgc',
+                                      type=str, default=None,
+                                      help=help_str)
+            help_str = 'Cancer genome landscapes driver gene list'
+            major_parser.add_argument('-landscapes', '--landscapes',
+                                type=str, default=None,
+                                help=help_str)
+            help_str = 'List of Pancan12 drivers from Kandoth et al.'
+            major_parser.add_argument('-k', '--kandoth',
+                                type=str, default=None,
+                                help=help_str)
+            help_str = 'List of High confidence Pancan12 drivers from Tamborero et al.'
+            major_parser.add_argument('-hcd', '--high-confidence-list',
+                                type=str, default=None,
+                                help=help_str)
             help_str = 'Custom driver gene list'
-            list_parser.add_argument('-g', '--gene-list',
-                                     type=str, default=None,
-                                     help=help_str)
-            help_str = 'Q-value threshold for significance (Default: 0.1)'
-            advance_parser.add_argument('-q', '--qvalue',
-                                        type=float, default=.1,
-                                        help=help_str)
+            advance_parser.add_argument('-g', '--gene-list',
+                                type=str, default=None,
+                                help=help_str)
             help_str = 'Generate plots examining evaluation (Default: False)'
             advance_parser.add_argument('-p', '--plot',
                                         action='store_true', default=False,
