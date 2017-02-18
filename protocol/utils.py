@@ -60,41 +60,15 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
         root.propagate = True
 
 
-def fetch_significant_genes(input_dir, method_name, config):
+def fetch_significant_genes(input_dir, config):
     """Read the significant driver genes for each method."""
     signif_dict = {}
     gene = 'gene'
-    meth_input_dir = os.path.join(input_dir, method_name)
-    for method_file in os.listdir(meth_input_dir):
-        if not method_file.endswith('.txt'): continue
-        if method_file.upper().startswith('README'): continue
-        cancer_type_name = os.path.splitext(method_file)[0]
-
-        # read in data
-        full_path = os.path.join(meth_input_dir, method_file)
-        df = pd.read_table(full_path)
-
-        # get the treshold for significance
-        thresh_col, score_val, top_direction = cfg.fetch_threshold(config, method_name)
-
-        # figure out if a custom score or q-value is used
-        if cfg.is_valid_config(config, method_name, 'threshold'):
-            #score_val = float(config[method_name]['threshold']['score'])
-            tmp_genes = set()
-            # get the top scoring genes
-            if top_direction == 'low':
-                signif_df = df[df[thresh_col]<=score_val]
-            else:
-                signif_df = df[df[thresh_col]>=score_val]
-            tmp_genes |= set(signif_df[gene].tolist())
-            signif_dict[cancer_type_name] = list(tmp_genes)
-        else:
-            # use q-value for threshold
-            tmp_genes = set()
-            # get the significant genes
-            signif_df = df[df[thresh_col]<=score_val]
-            tmp_genes |= set(signif_df[gene].tolist())
-            signif_dict[cancer_type_name] = list(tmp_genes)
+    method_list = cfg.fetch_gene_level_names(config)
+    signif_dict = {}
+    for method_name in method_list:
+        method_signif_dict = fetch_single_method_significant_genes(input_dir, method_name, config)
+        signif_dict[method_name] = method_signif_dict
     return signif_dict
 
 
