@@ -91,49 +91,41 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
         root.propagate = True
 
 
-
-def fetch_significant_genes(input_dir, qval, config):
+def fetch_significant_genes(input_dir, method_name, config):
     """Read the significant driver genes for each method."""
     signif_dict = {}
-    if cfg.is_valid_config(config, method_name, 'gene_col'):
-        gene = config[method_name]['gene_col']
-    else:
-        gene = 'gene'
-    for method_file in os.listdir(input_dir):
+    gene = 'gene'
+    meth_input_dir = os.path.join(input_dir, method_name)
+    for method_file in os.listdir(meth_input_dir):
         if not method_file.endswith('.txt'): continue
-        method_name = os.path.splitext(method_file)[0]
+        if method_file.upper().startswith('README'): continue
+        cancer_type_name = os.path.splitext(method_file)[0]
 
         # read in data
-        full_path = os.path.join(input_dir, method_file)
+        full_path = os.path.join(meth_input_dir, method_file)
         df = pd.read_table(full_path)
 
-        # figure out which columns are being used
-        if cfg.is_valid_config(config, method_name, 'qvalue'):
-            qval_cols = config[method_name]['qvalue']
-        else:
-            qval_cols = ['qvalue']
+        # get the treshold for significance
+        thresh_col, score_val, top_direction = cfg.fetch_threshold(config, method_name)
 
         # figure out if a custom score or q-value is used
         if cfg.is_valid_config(config, method_name, 'threshold'):
-            score_val = float(config[method_name]['threshold']['score'])
+            #score_val = float(config[method_name]['threshold']['score'])
             tmp_genes = set()
-            for qval_col in qval_cols:
-                # get the top scoring genes
-                top_direction = config[method_name]['threshold']['top']
-                if top_direction == 'low':
-                    signif_df = df[df[qval_col]<=score_val]
-                else:
-                    signif_df = df[df[qval_col]>=score_val]
-                tmp_genes |= set(signif_df[gene].tolist())
-            signif_dict[method_name] = list(tmp_genes)
+            # get the top scoring genes
+            if top_direction == 'low':
+                signif_df = df[df[thresh_col]<=score_val]
+            else:
+                signif_df = df[df[thresh_col]>=score_val]
+            tmp_genes |= set(signif_df[gene].tolist())
+            signif_dict[cancer_type_name] = list(tmp_genes)
         else:
             # use q-value for threshold
             tmp_genes = set()
-            for qval_col in qval_cols:
-                # get the significant genes
-                signif_df = df[df[qval_col]<=qval]
-                tmp_genes |= set(signif_df[gene].tolist())
-            signif_dict[method_name] = list(tmp_genes)
+            # get the significant genes
+            signif_df = df[df[thresh_col]<=score_val]
+            tmp_genes |= set(signif_df[gene].tolist())
+            signif_dict[cancer_type_name] = list(tmp_genes)
     return signif_dict
 
 
@@ -209,6 +201,9 @@ def fetch_raw_dataframes(input_dir, method_name):
     data_dict = {}
     meth_input_dir = os.path.join(input_dir, method_name)
     for method_file in os.listdir(meth_input_dir):
+        #method_name = os.path.splitext(method_file)[0]
+        cancer_type = os.path.splitext(method_file)[0]
+
         # skip READMEs
         if method_file.upper().startswith('README'): continue
 
@@ -216,7 +211,8 @@ def fetch_raw_dataframes(input_dir, method_name):
         full_path = os.path.join(meth_input_dir, method_file)
         df = pd.read_table(full_path)
 
-        data_dict[method_name] = df
+        #data_dict[method_name] = df
+        data_dict[cancer_type] = df
 
     return data_dict
 
@@ -256,12 +252,9 @@ def fetch_filtered_dataframes(input_dir, output_dir, min_methods, config, cgc_pa
     return df_dict
 
 
-def read_filtered_pvalues(input_dir, cgc, config, method_name):
+def read_filtered_pvalues(input_dir, blacklist, config, method_name):
     """Get p-values without 'likely' driver genes"""
     df_dict = fetch_raw_dataframes(input_dir, method_name)
-
-    # figure out driver black list
-    blacklist = set(cgc) | set(agreed_predictions)
 
     # gene column name
     if cfg.is_valid_config(config, method_name, 'gene_col'):
