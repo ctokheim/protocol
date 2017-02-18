@@ -176,9 +176,11 @@ def main(opts):
         intersect_landscapes = len(pancan_genes & set(landscapes))
         intersect_kandoth = len(pancan_genes & set(kandoth))
         intersect_tamborero = len(pancan_genes & set(tamborero))
-        intersect_all = len(pancan_genes & (set(cgc) | set(landscapes) | set(kandoth) | set(tamborero)))
-        s = pd.Series([intersect_cgc, intersect_landscapes, intersect_kandoth, intersect_tamborero, intersect_all, len(pancan_genes)],
-                      index=['CGC', 'Landscapes', 'Kandoth et al.', 'Tamborero et al.', 'Any list', 'Method Total'])
+        all_lists = (set(cgc) | set(landscapes) | set(kandoth) | set(tamborero))
+        intersect_all = len(pancan_genes & all_lists)
+        s = pd.Series([intersect_cgc, intersect_landscapes, intersect_kandoth, intersect_tamborero, intersect_all],
+                      index=['CGC', 'Landscapes', 'Kandoth et al.', 'Tamborero et al.', 'Any list'])
+        s = s / len(pancan_genes)
         out_path = os.path.join(opts['output'], method_name, 'gene_list_overlap.pdf')
         plot_data.single_method_overlap(s, out_path)
         logger.info('Finished')
@@ -232,10 +234,10 @@ def main(opts):
 
         # plot the MLFC scores
         logger.info('Analyzing the divergence of p-values from expectations . . .')
-        pval_dict = utils.read_filtered_pvalues(opts['input_dir'], cgc,
+        pval_dict = utils.read_filtered_pvalues(opts['input_dir'], all_lists,
                                                 config, method_name)
         mlfc_dict = {t: p_value.calculate_mlfc(pval_dict[t], method_name, config)
-                    for t in pval_dict}
+                     for t in pval_dict}
         mlfc_series = pd.Series(mlfc_dict)
         out_path = os.path.join(opts['output'], method_name, 'cancer_type_mlfc.pdf')
         plot_data.mlfc_score(mlfc_series, out_path)
