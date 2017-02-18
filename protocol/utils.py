@@ -13,37 +13,6 @@ import config as cfg
 
 logger = logging.getLogger(__name__)  # module logger
 
-agreed_predictions = set([
-    'PLCG1', 'CRLF2', 'SMARCD1', 'SH2B3', 'STK11', 'MEN1', 'IKBKB', 'AKT1', 'B2M', 'MLH1',
-    'USP28', 'TSHR', 'FGFR4', 'GPS2', 'CDC73', 'PIK3CA', 'MAP3K1', 'CACNA1D', 'FGFR3', 'TSC1',
-    'ZC3H13', 'CBFB', 'ARHGAP26', 'CDH1', 'JAK2', 'ABCD2', 'NFKBIE', 'CUL1', 'GNAS', 'BRCA1',
-    'ERBB3', 'BRCA2', 'DDX3X', 'PIK3R1', 'IDH2', 'IDH1', 'JAK1', 'KLF4', 'STAT5B', 'IWS1',
-    'RPL10', 'SMAD2', 'CSF3R', 'KRAS', 'SETD2', 'FGFR2', 'GATA3', 'UBR5', 'ALK', 'KAT8',
-    'SOCS1', 'MAX', 'PTPN11', 'ASXL1', 'POLE', 'TCF7L2', 'KIT', 'FOXA1', 'DDX5', 'FAT1',
-    'RUNX1', 'CYLD', 'CD79B', 'ARID1B', 'APC', 'DAXX', 'ARID1A', 'CTCF', 'KDM5C', 'IL7R',
-    'JAK3', 'CD1D', 'ACVR1B', 'CDKN1B', 'HLA-A', 'RPL5', 'COPS4', 'GGCT', 'TNFRSF14', 'FBXO11',
-    'SETBP1', 'TRAF7', 'DNM2', 'CCAR1', 'ARID4B', 'XPO1', 'SPEN', 'KANSL1', 'CHD4', 'WDR47',
-    'U2AF1', 'TTR', 'GK2', 'SPOP', 'PPP6C', 'NF2', 'NF1', 'PCBP1', 'AMPH', 'MYD88',
-    'GRM3', 'MYH2', 'ATP1A1', 'STAG2', 'ARID2', 'RNF43', 'TUBA3C', 'TRRAP', 'PAX5', 'CUX1',
-    'HRAS', 'RAD21', 'HMCN1', 'ING1', 'DNER', 'MGA', 'TP53', 'GNAQ', 'ESR1', 'FAM47B',
-    'MPL', 'CBL', 'STK31', 'KRT15', 'PRDM1', 'NFE2L2', 'NSD1', 'MYCN', 'AGTR1', 'CREBBP',
-    'ZRSR2', 'PDGFRA', 'GIGYF2', 'SMAD4', 'GATA1', 'ATM', 'EPHA2', 'POT1', 'SMAD3', 'SMO',
-    'TBX3', 'CBLB', 'ATR', 'BIRC3', 'ABL1', 'AMER1', 'FAM46C', 'RAF1', 'FLT3', 'NCOR1',
-    'CD79A', 'NCOA2', 'TP63', 'STAT3', 'H3F3B', 'MYH9', 'ECT2L', 'CDKN2A(p14)', 'RET', 'MAPK1',
-    'KDM6A', 'BRWD3', 'PENK', 'CDKN1A', 'KDR', 'FBXW7', 'TGFBR2', 'FUBP1', 'PDYN', 'RQCD1',
-    'GATA2', 'EGFR', 'TET2', 'ZFP36L1', 'ZFP36L2', 'MTOR', 'PRKAR1A', 'BCOR', 'ATRX', 'EP300',
-    'TNFAIP3', 'DICER1', 'TBL1XR1', 'KCNJ5', 'MAP2K2', 'COL2A1', 'ALB', 'MAP2K1', 'KEAP1', 'EZH2',
-    'CDK4', 'RAC1', 'PBRM1', 'CMTR2', 'BRE', 'RHEB', 'LPAR4', 'AMOT', 'CIC', 'PPP2R1A',
-    'ACVR1', 'WT1', 'ZNF318', 'MSH2', 'SF3B1', 'MSH6', 'CTNNB1', 'VHL', 'USP9X', 'SOX9',
-    'NOTCH2', 'MAP2K4', 'ELF3', 'SMARCA4', 'H3F3A', 'CEBPA', 'AXIN2', 'AXIN1', 'TWIST1', 'FAS',
-    'NRAS', 'RB1', 'CDKN2A', 'KLF6', 'MED12', 'HNF1A', 'ETNK1', 'ATG5', 'CNOT3', 'NRG3',
-    'TERT', 'AJUBA', 'NT5C2', 'BRAF', 'KMT2C', 'KMT2B', 'KMT2A', 'DNMT3A', 'SMARCB1', 'KMT2D',
-    'PTEN', 'RBM10', 'CARD11', 'GNA11', 'RHOA', 'PTPRB', 'MAP3K13', 'HIST1H3B', 'PHF6', 'TP53BP1',
-    'TSC2', 'SUFU', 'DACH1', 'TRIP12', 'PHOX2B', 'NPM1', 'RASA1', 'MYOD1', 'PTCH1', 'ERBB2',
-    'CALR', 'SRSF2', 'DKK2', 'NOTCH1', 'CASP8', 'CDK12', 'GRIN2A', 'PTPRC', 'ARHGAP35', 'CHD8',
-    'FOXL2', 'BAP1', 'BCL6', 'MET'
-])
-
 def start_logging(log_file='', log_level='INFO', verbose=False):
     """Start logging information into the log directory.
 
