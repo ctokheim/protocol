@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import eval_stats
 import utils
+import config as cfg
 import os
 
 # logging
@@ -10,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 def calculate_mlfc(df, meth_name, config):
     # check whether there is custom p-value columns
-    if utils.is_valid_config(config, meth_name, 'pvalue'):
-        pval_cols = config[meth_name]['pvalue']
-    else:
-        pval_cols = ['pvalue']
+    #if cfg.is_valid_config(config, meth_name, 'pvalue'):
+        #pval_cols = config[meth_name]['pvalue']
+    #else:
+    pval_cols = ['pvalue']
 
     # calculate the mlfc scores for each pvalue column
     mlfc_score_list = []

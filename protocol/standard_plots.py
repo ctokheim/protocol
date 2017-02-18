@@ -12,6 +12,7 @@ import consistency
 import plot_data
 import utils
 import numpy as np
+import config as cfg
 
 logger = logging.getLogger(__name__)  # module logger
 
@@ -46,13 +47,9 @@ def parse_arguments():
     parser.add_argument('-m', '--mutations',
                         type=str, required=True,
                         help=help_str)
-    help_str = 'Method name (should be same as listed inside config.yaml)'
-    parser.add_argument('-n', '--method-name',
-                        type=str, required=True,
-                        help=help_str)
-    help_str = 'Name of column with cancer type information in MAF file'
+    help_str = 'Name of column with cancer type information in MAF file (Default: CODE)'
     parser.add_argument('-t', '--tumor-type-col',
-                        type=str, required=True,
+                        type=str, default="CODE",
                         help=help_str)
     help_str = 'Path to Cancer Gene Census file'
     parser.add_argument('-c', '--cgc',
@@ -73,13 +70,6 @@ def parse_arguments():
     help_str = 'Configuration file (YAML format)'
     parser.add_argument('-config', '--config',
                         type=str, default=None,
-                        help=help_str)
-    help_str = ('Q-value threshold for significance (Default: 0.1). '
-                'This option is only specified if you do not include a threshold in '
-                'the config file. The value in the configuration file will take '
-                'precedence.')
-    parser.add_argument('-q', '--qvalue',
-                        type=float, default=.1,
                         help=help_str)
     help_str = 'output directory'
     parser.add_argument('-o', '--output',
@@ -161,90 +151,95 @@ def main(opts):
     kandoth = cgc_overlap.read_custom_list(opts['kandoth'])
     tamborero = cgc_overlap.read_custom_list(opts['high_confidence_list'])
 
-    # get significant genes
-    signif_dict = utils.fetch_single_method_significant_genes(opts['input_dir'],
-                                                              opts['method_name'],
-                                                              opts['qvalue'],
-                                                              config)
-    pancan_df = pd.read_table(os.path.join(opts['input_dir'], 'PANCAN.txt'))
+    gene_methods = cfg.fetch_gene_level_names(config)
+    for method_name in gene_methods:
+        logger.info('Analyzing: {0}'.format(method_name))
+
+        # make directory if it doesnt exist
+        meth_out_dir = os.path.join(opts['output'], method_name)
+        if not os.path.exists(meth_out_dir): os.makedirs(meth_out_dir)
+
+        # get significant genes
+        signif_dict = utils.fetch_single_method_significant_genes(opts['input_dir'],
+                                                                  method_name,
+                                                                  config)
+        pancan_df = pd.read_table(os.path.join(opts['input_dir'], method_name, 'PANCAN.txt'))
 
 
-    ###########################
-    # Pan-cancer plots
-    ###########################
-    # overlap with gene lists
-    logger.info('Overlapping genes with CGC, Cancer Genome Landscapes, kandoth et al, and tamborero et al. . . .')
-    pancan_genes = set(signif_dict['PANCAN'])
-    intersect_cgc = len(pancan_genes & set(cgc))
-    intersect_landscapes = len(pancan_genes & set(landscapes))
-    intersect_kandoth = len(pancan_genes & set(kandoth))
-    intersect_tamborero = len(pancan_genes & set(tamborero))
-    intersect_all = len(pancan_genes & (set(cgc) | set(landscapes) | set(kandoth) | set(tamborero)))
-    s = pd.Series([intersect_cgc, intersect_landscapes, intersect_kandoth, intersect_tamborero, intersect_all, len(pancan_genes)],
-                   index=['CGC', 'Landscapes', 'Kandoth et al.', 'Tamborero et al.', 'Any list', 'Method Total'])
-    out_path = os.path.join(opts['output'], 'gene_list_overlap.pdf')
-    plot_data.single_method_overlap(s, out_path)
-    logger.info('Finished')
+        ###########################
+        # Pan-cancer plots
+        ###########################
+        # overlap with gene lists
+        logger.info('Overlapping genes with CGC, Cancer Genome Landscapes, kandoth et al, and tamborero et al. . . .')
+        pancan_genes = set(signif_dict['PANCAN'])
+        intersect_cgc = len(pancan_genes & set(cgc))
+        intersect_landscapes = len(pancan_genes & set(landscapes))
+        intersect_kandoth = len(pancan_genes & set(kandoth))
+        intersect_tamborero = len(pancan_genes & set(tamborero))
+        intersect_all = len(pancan_genes & (set(cgc) | set(landscapes) | set(kandoth) | set(tamborero)))
+        s = pd.Series([intersect_cgc, intersect_landscapes, intersect_kandoth, intersect_tamborero, intersect_all, len(pancan_genes)],
+                      index=['CGC', 'Landscapes', 'Kandoth et al.', 'Tamborero et al.', 'Any list', 'Method Total'])
+        out_path = os.path.join(opts['output'], method_name, 'gene_list_overlap.pdf')
+        plot_data.single_method_overlap(s, out_path)
+        logger.info('Finished')
 
-    # qq-plot
-    # figure out which columns are being used
-    method_name = opts['method_name']
-    if utils.is_valid_config(config, method_name, 'pvalue'):
-        pval_col = config[method_name]['pvalue'][0]
-    else:
+        # qq-plot
+        # figure out which columns are being used
         pval_col = 'pvalue'
-    logger.info('Creating p-value QQ plot . . .')
-    out_path = os.path.join(opts['output'], 'qq_plot.pdf')
-    plot_data.single_method_qqplot(pancan_df[pval_col], out_path)
-    logger.info('Finished.')
+        if pancan_df[pval_col].iloc[0] != '.':
+            logger.info('Creating p-value QQ plot . . .')
+            out_path = os.path.join(opts['output'], method_name, 'qq_plot.png')
+            plot_data.single_method_qqplot(pancan_df[pval_col], out_path)
+            logger.info('Finished.')
 
-    ###########################
-    # Cancer type specific plots
-    ###########################
-    del signif_dict['PANCAN']
-    if not signif_dict:
-        return
-    # process maf file
-    useful_cols = ['Hugo_Symbol', 'Chromosome', 'Start_Position',
-                   'End_Position', 'Strand', 'Variant_Classification',
-                   'Variant_Type', 'Reference_Allele', 'Tumor_Seq_Allele1',
-                   'Tumor_Seq_Allele2', 'Tumor_Sample_Barcode', 'Transcript_ID',
-                   'HGVSp_Short', 'Protein_position', 'CENTERS', 'FILTER', 'Tumor_Type',
-                   't_depth', 't_alt_count']
-    mut_df = pd.read_table(opts['mutations'], usecols=useful_cols)
-    drop_variants = ["3'UTR", "5'UTR", "3'Flank", "5'Flank", "RNA", "Intron",]
-    mut_df = mut_df[~mut_df['Variant_Classification'].isin(drop_variants)]
-    mut_df['is_nonsilent'] = 0
-    mut_df.loc[mut_df['Variant_Classification']!='Silent', 'is_nonsilent'] = 1
+        ###########################
+        # Cancer type specific plots
+        ###########################
+        cancer_type_col = opts['tumor_type_col']
+        del signif_dict['PANCAN']
+        if not signif_dict:
+            return
+        # process maf file
+        useful_cols = ['Hugo_Symbol', 'Chromosome', 'Start_Position',
+                    'End_Position', 'Strand', 'Variant_Classification',
+                    'Variant_Type', 'Reference_Allele', 'Tumor_Seq_Allele1',
+                    'Tumor_Seq_Allele2', 'Tumor_Sample_Barcode', 'Transcript_ID',
+                    'HGVSp_Short', 'Protein_position', 'CENTERS', 'FILTER',
+                    't_depth', 't_alt_count', cancer_type_col]
+        mut_df = pd.read_table(opts['mutations'], usecols=useful_cols)
+        drop_variants = ["3'UTR", "5'UTR", "3'Flank", "5'Flank", "RNA", "Intron",]
+        mut_df = mut_df[~mut_df['Variant_Classification'].isin(drop_variants)]
+        mut_df['is_nonsilent'] = 0
+        mut_df.loc[mut_df['Variant_Classification']!='Silent', 'is_nonsilent'] = 1
 
-    # plot number of drivers per sample
-    logger.info('Analyzing number of drivers per sample . . .')
-    ttype_data = dict()
-    for ttype in mut_df['Tumor_Type'].dropna().unique():
-        ttype_data[ttype] = mut_df[mut_df['Tumor_Type']==ttype].copy()
-    driver_mean, driver_per_sample = get_avg_drivers(ttype_data, signif_dict)
-    out_path = os.path.join(opts['output'], 'cancer_type_per_sample.pdf')
-    order = plot_data.single_method_driver_per_sample(driver_per_sample,
-                                                      out_path)
-    logger.info('Finished.')
+        # plot number of drivers per sample
+        logger.info('Analyzing number of drivers per sample . . .')
+        ttype_data = dict()
+        for ttype in mut_df[cancer_type_col].dropna().unique():
+            ttype_data[ttype] = mut_df[mut_df[cancer_type_col]==ttype].copy()
+        driver_mean, driver_per_sample = get_avg_drivers(ttype_data, signif_dict)
+        out_path = os.path.join(opts['output'], method_name, 'cancer_type_per_sample.pdf')
+        order = plot_data.single_method_driver_per_sample(driver_per_sample,
+                                                          out_path)
+        logger.info('Finished.')
 
-    # plot number of driver genes
-    logger.info('Analyzing number of driver in each cancer type . . .')
-    signif_ct = pd.Series({k: len(signif_dict[k]) for k in signif_dict})
-    out_path = os.path.join(opts['output'], 'cancer_type_num_drivers.pdf')
-    plot_data.single_method_num_drivers_per_type(signif_ct, order, out_path)
-    logger.info('Finished.')
+        # plot number of driver genes
+        logger.info('Analyzing number of driver in each cancer type . . .')
+        signif_ct = pd.Series({k: len(signif_dict[k]) for k in signif_dict})
+        out_path = os.path.join(opts['output'], method_name, 'cancer_type_num_drivers.pdf')
+        plot_data.single_method_num_drivers_per_type(signif_ct, order, out_path)
+        logger.info('Finished.')
 
-    # plot the MLFC scores
-    logger.info('Analyzing the divergence of p-values from expectations . . .')
-    pval_dict = utils.read_filtered_pvalues(opts['input_dir'], cgc,
-                                            config, opts['method_name'])
-    mlfc_dict = {t: p_value.calculate_mlfc(pval_dict[t], opts['method_name'], config)
-                 for t in pval_dict}
-    mlfc_series = pd.Series(mlfc_dict)
-    out_path = os.path.join(opts['output'], 'cancer_type_mlfc.pdf')
-    plot_data.mlfc_score(mlfc_series, out_path)
-    logger.info('Finished.')
+        # plot the MLFC scores
+        logger.info('Analyzing the divergence of p-values from expectations . . .')
+        pval_dict = utils.read_filtered_pvalues(opts['input_dir'], cgc,
+                                                config, method_name)
+        mlfc_dict = {t: p_value.calculate_mlfc(pval_dict[t], method_name, config)
+                    for t in pval_dict}
+        mlfc_series = pd.Series(mlfc_dict)
+        out_path = os.path.join(opts['output'], method_name, 'cancer_type_mlfc.pdf')
+        plot_data.mlfc_score(mlfc_series, out_path)
+        logger.info('Finished.')
 
 
 def cli_main():

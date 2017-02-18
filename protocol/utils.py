@@ -9,6 +9,7 @@ import logging
 import datetime
 import os
 import sys
+import config as cfg
 
 logger = logging.getLogger(__name__)  # module logger
 
@@ -90,10 +91,11 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
         root.propagate = True
 
 
+
 def fetch_significant_genes(input_dir, qval, config):
     """Read the significant driver genes for each method."""
     signif_dict = {}
-    if is_valid_config(config, method_name, 'gene_col'):
+    if cfg.is_valid_config(config, method_name, 'gene_col'):
         gene = config[method_name]['gene_col']
     else:
         gene = 'gene'
@@ -106,13 +108,13 @@ def fetch_significant_genes(input_dir, qval, config):
         df = pd.read_table(full_path)
 
         # figure out which columns are being used
-        if is_valid_config(config, method_name, 'qvalue'):
+        if cfg.is_valid_config(config, method_name, 'qvalue'):
             qval_cols = config[method_name]['qvalue']
         else:
             qval_cols = ['qvalue']
 
         # figure out if a custom score or q-value is used
-        if is_valid_config(config, method_name, 'threshold'):
+        if cfg.is_valid_config(config, method_name, 'threshold'):
             score_val = float(config[method_name]['threshold']['score'])
             tmp_genes = set()
             for qval_col in qval_cols:
@@ -135,48 +137,40 @@ def fetch_significant_genes(input_dir, qval, config):
     return signif_dict
 
 
-def fetch_single_method_significant_genes(input_dir, method_name, qval, config):
+def fetch_single_method_significant_genes(input_dir, method_name, config):
     """Read the significant driver genes for a single method."""
     signif_dict = {}
-    if is_valid_config(config, method_name, 'gene_col'):
-        gene = config[method_name]['gene_col']
-    else:
-        gene = 'gene'
-    for method_file in os.listdir(input_dir):
+    gene = 'gene'
+    meth_input_dir = os.path.join(input_dir, method_name)
+    for method_file in os.listdir(meth_input_dir):
         if not method_file.endswith('.txt'): continue
         if method_file.upper().startswith('README'): continue
         cancer_type_name = os.path.splitext(method_file)[0]
 
         # read in data
-        full_path = os.path.join(input_dir, method_file)
+        full_path = os.path.join(meth_input_dir, method_file)
         df = pd.read_table(full_path)
 
-        # figure out which columns are being used
-        if is_valid_config(config, method_name, 'qvalue'):
-            qval_cols = config[method_name]['qvalue']
-        else:
-            qval_cols = ['qvalue']
+        # get the treshold for significance
+        thresh_col, score_val, top_direction = cfg.fetch_threshold(config, method_name)
 
         # figure out if a custom score or q-value is used
-        if is_valid_config(config, method_name, 'threshold'):
-            score_val = float(config[method_name]['threshold']['score'])
+        if cfg.is_valid_config(config, method_name, 'threshold'):
             tmp_genes = set()
-            for qval_col in qval_cols:
-                # get the top scoring genes
-                top_direction = config[method_name]['threshold']['top']
-                if top_direction == 'low':
-                    signif_df = df[df[qval_col]<=score_val]
-                else:
-                    signif_df = df[df[qval_col]>=score_val]
-                tmp_genes |= set(signif_df[gene].tolist())
+            # get the top scoring genes
+            top_direction = config[method_name]['threshold']['top']
+            if top_direction == 'low':
+                signif_df = df[df[thresh_col]<=score_val]
+            else:
+                signif_df = df[df[thresh_col]>=score_val]
+            tmp_genes |= set(signif_df[gene].tolist())
             signif_dict[cancer_type_name] = list(tmp_genes)
         else:
             # use q-value for threshold
             tmp_genes = set()
-            for qval_col in qval_cols:
-                # get the significant genes
-                signif_df = df[df[qval_col]<=qval]
-                tmp_genes |= set(signif_df[gene].tolist())
+            # get the significant genes
+            signif_df = df[df[thresh_col]<=score_val]
+            tmp_genes |= set(signif_df[gene].tolist())
             signif_dict[cancer_type_name] = list(tmp_genes)
     return signif_dict
 
@@ -211,16 +205,15 @@ def process_cgc(path):
     return cgc_genes
 
 
-def fetch_raw_dataframes(input_dir):
+def fetch_raw_dataframes(input_dir, method_name):
     data_dict = {}
-    for method_file in os.listdir(input_dir):
-        method_name = os.path.splitext(method_file)[0]
-
+    meth_input_dir = os.path.join(input_dir, method_name)
+    for method_file in os.listdir(meth_input_dir):
         # skip READMEs
-        if method_name.upper().startswith('README'): continue
+        if method_file.upper().startswith('README'): continue
 
         # read in data
-        full_path = os.path.join(input_dir, method_file)
+        full_path = os.path.join(meth_input_dir, method_file)
         df = pd.read_table(full_path)
 
         data_dict[method_name] = df
@@ -241,7 +234,7 @@ def fetch_filtered_dataframes(input_dir, output_dir, min_methods, config, cgc_pa
     overlap_genes = read_method_overlap_genes(overlap_path, min_methods)
 
     # gene column name
-    if is_valid_config(config, method_name, 'gene_col'):
+    if cfg.is_valid_config(config, method_name, 'gene_col'):
         gene = config[method_name]['gene_col']
     else:
         gene = 'gene'
@@ -265,19 +258,19 @@ def fetch_filtered_dataframes(input_dir, output_dir, min_methods, config, cgc_pa
 
 def read_filtered_pvalues(input_dir, cgc, config, method_name):
     """Get p-values without 'likely' driver genes"""
-    df_dict = fetch_raw_dataframes(input_dir)
+    df_dict = fetch_raw_dataframes(input_dir, method_name)
 
     # figure out driver black list
     blacklist = set(cgc) | set(agreed_predictions)
 
     # gene column name
-    if is_valid_config(config, method_name, 'gene_col'):
+    if cfg.is_valid_config(config, method_name, 'gene_col'):
         gene = config[method_name]['gene_col']
     else:
         gene = 'gene'
 
     # pvalue column
-    if is_valid_config(config, method_name, 'pvalue'):
+    if cfg.is_valid_config(config, method_name, 'pvalue'):
         pval_col = config[method_name]['pvalue'][0]
     else:
         pval_col = 'pvalue'
@@ -302,17 +295,3 @@ def load_config(path):
         return None
 
 
-def is_valid_config(myconfig, method_name, attribute):
-    # check if the above attributes are valid
-    has_config = myconfig is not None
-    if not has_config:
-        return False
-    has_method = method_name in myconfig
-    if not has_method:
-        return False
-    has_attribute = attribute in myconfig[method_name]
-    if not has_attribute:
-        return False
-
-    # no problem, return True
-    return True
