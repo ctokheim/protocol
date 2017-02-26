@@ -114,6 +114,11 @@ def consistency_comparison(df1, df2, mydepth,
 
 
 def mean_log_fold_change(data):
+    # catch cases where not a number or empty
+    if len(data)==0: return np.nan
+    elif data.iloc[0] == '.': return np.nan
+
+    # compute mlfc
     tmp = data.copy()
     tmp.sort_values(ascending=True, inplace=True)
     tmp[tmp==0] = tmp[tmp>0].min()  # avoid infinity in log by avoiding zero pvals
