@@ -117,13 +117,14 @@ def single_method_overlap(s, filepath):
     s : pd.Series
         contains overlap counts
     """
-    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.2):
+    with sns.axes_style('ticks'), sns.plotting_context('paper', font_scale=1.0):
         ax = sns.barplot(s.index, s, color='black')
 
         sns.despine()
         plt.xticks(rotation=45, ha='right', va='top')
 
-        ax.set_ylabel('# of overlapping genes')
+        ax.set_ylabel('fraction of overlapping genes')
+        plt.title('Pancancer')
         plt.gcf().set_size_inches(2, 3)
         plt.tight_layout()
         plt.savefig(filepath)
@@ -214,12 +215,16 @@ def cgc_overlap(cgc_overlap_df, path, list_name='CGC'):
             plt.text(rect.get_x()+rect.get_width()/2., height+.005, '%s' % (name[ii]),
                      ha='center', va='bottom', size=16)
 
+    # hack to prevent error with zero overlap
+    frac_ovlp_col = 'Fraction overlap ({0})'.format(list_name)
+    #cgc_overlap_df.loc[cgc_overlap_df[frac_ovlp_col]==0, frac_ovlp_col] = 0.01
+
     # plot barplot
-    mymethods = cgc_overlap_df.sort('Fraction overlap ({0})'.format(list_name)).index.tolist()
+    mymethods = cgc_overlap_df.sort(frac_ovlp_col).index.tolist()
     name = cgc_overlap_df.ix[mymethods]['# '+list_name].tolist()
     with sns.axes_style('ticks'), sns.plotting_context('talk', font_scale=1.5):
         ax = sns.barplot(cgc_overlap_df.index,
-                         cgc_overlap_df['Fraction overlap ({0})'.format(list_name)],
+                         cgc_overlap_df[frac_ovlp_col],
                          order=mymethods, color='black')
 
         # label each bar
