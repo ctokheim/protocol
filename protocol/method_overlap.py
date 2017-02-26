@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from collections import Counter
 import utils
+import config as cfg
 
 # logging
 import logging
@@ -24,26 +25,25 @@ def gene_overlap_count(cts, num_methods):
     return overlap_df
 
 
-def method_overlap_count(signif_genes, gene_counts):
+def method_overlap_count(signif_genes, config, level='gene'):
+    meth_names = cfg.fetch_level_names(config, level=level, exclude=True)
     output_list = []
-    for method in signif_genes:
-        # list of num ovlps
-        method_cts = [gene_counts[g]-1 for g in signif_genes[method]]
+    for method in meth_names:
+        # merge method counts for each method individually
+        method_cts = [signif_genes[c][signif_genes[c][method]>0].sum(axis=1)
+                      for c in signif_genes]
+        myresult = pd.concat(method_cts, axis=1)
+        max_method_ct = myresult.max(axis=1)
 
-        # get overlap counts
-        num_uniq = len([x for x in method_cts if x==0])
-        num_one = len([x for x in method_cts if x==1])
-        num_two = len([x for x in method_cts if x==2])
-        num_three = len([x for x in method_cts if x>=3])
-        num_total = len(method_cts)
+        # name series according to method
+        max_method_ct.name = method
 
-        # append result
-        tmp_list = [method, num_total, num_uniq, num_one, num_two, num_three]
-        output_list.append(tmp_list)
+        # append counts to list
+        output_list.append(max_method_ct)
 
     # format into dataframe
-    header_names = ['Method', 'Total', 'unique', '1', '2', '>=3']
-    output_df = pd.DataFrame(output_list, columns=header_names)
+    output_df = pd.concat(output_list, axis=1)
+    #output_df = pd.DataFrame(output_list, columns=header_names)
 
     return output_df
 
@@ -52,30 +52,48 @@ def main(opts):
     logger.info('Running method_overlap sub-command . . .')
     config = utils.load_config(opts['config'])
 
-    # get the significant genes for each method
-    signif_dict = utils.fetch_significant_genes(opts['input_dir'],
-                                                opts['qvalue'],
-                                                config)
-    num_methods = len(signif_dict)
+    all_signif_dict = utils.fetch_significant(opts['input_dir'], config, level='gene')
+    call_dict = {}
+    gene_methods = cfg.fetch_level_names(config, level='gene')
+    cancer_types = all_signif_dict[all_signif_dict.keys()[0]].keys()
+    for cancer_type in cancer_types:
+        # setup a dataframe with the union of significant genes
+        union_signif = reduce(lambda x, y: x | y,
+                              (set(all_signif_dict[m].get(cancer_type, []))
+                               for m in all_signif_dict))
+        call_df = pd.DataFrame(index=union_signif)
+
+        # add results from each method
+        for meth in gene_methods:
+            call_df[meth] = 0
+            call_df.loc[all_signif_dict[meth].get(cancer_type, []), meth] = 1
+
+        # add results to dictionary
+        call_dict[cancer_type] = call_df
+
+        # save dataframe
+        tmp_path = os.path.join(opts['output'], cancer_type+'.gene_overlap.txt')
+        call_df.to_csv(tmp_path, sep='\t')
 
     # eliminate any excluded methods
-    if utils.is_valid_config(config, 'exclude', 'method_overlap'):
-        exclude_methods = config['exclude']['method_overlap']
-        meth_list = list(signif_dict.keys())
-        for meth in meth_list:
-            if meth in exclude_methods:
-                del signif_dict[meth]
+    if 'exclude' in config:
+        exclude_methods = config['exclude']
+        cancer_type_list = list(call_dict.keys())
+        for c in cancer_type_list:
+            for meth in exclude_methods:
+                if meth in call_dict[c]:
+                    del call_dict[c][meth]
 
-    # count how many time each gene is significant
-    gene_cts = Counter([g for method in signif_dict for g in signif_dict[method]])
-    gene_overlap_df = gene_overlap_count(gene_cts, num_methods)
-
-    # calculate the number of overlaps for each method
-    method_ovlp_df = method_overlap_count(signif_dict, gene_cts)
+    # Analyze method counts
+    method_overlap_df = method_overlap_count(call_dict, config, level='gene')
+    tmp_path = os.path.join(opts['output'], 'gene_overlap.txt')
+    method_overlap_df.to_csv(tmp_path, sep='\t')
+    all_cols = method_overlap_df.columns.tolist()
+    meth_melt_df = pd.melt(method_overlap_df, value_vars=all_cols).dropna()
+    import IPython ; IPython.embed()
+    raise
 
     # save result
-    gene_path = os.path.join(opts['output'], 'gene_overlap_counts.txt')
-    gene_overlap_df.to_csv(gene_path, sep='\t', index=False)
     method_path = os.path.join(opts['output'], 'method_overlap.txt')
     method_ovlp_df.to_csv(method_path, sep='\t', index=False)
 
