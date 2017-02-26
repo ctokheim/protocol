@@ -60,22 +60,23 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
         root.propagate = True
 
 
-def fetch_significant_genes(input_dir, config):
+def fetch_significant(input_dir, config, level='gene'):
     """Read the significant driver genes for each method."""
     signif_dict = {}
-    gene = 'gene'
-    method_list = cfg.fetch_gene_level_names(config)
+    method_list = cfg.fetch_level_names(config, level=level)
     signif_dict = {}
     for method_name in method_list:
-        method_signif_dict = fetch_single_method_significant_genes(input_dir, method_name, config)
+        method_signif_dict = fetch_single_method_significant(input_dir,
+                                                             method_name,
+                                                             config,
+                                                             level=level)
         signif_dict[method_name] = method_signif_dict
     return signif_dict
 
 
-def fetch_single_method_significant_genes(input_dir, method_name, config):
+def fetch_single_method_significant(input_dir, method_name, config, level='gene'):
     """Read the significant driver genes for a single method."""
     signif_dict = {}
-    gene = 'gene'
     meth_input_dir = os.path.join(input_dir, method_name)
     for method_file in os.listdir(meth_input_dir):
         if not method_file.endswith('.txt'): continue
@@ -85,28 +86,36 @@ def fetch_single_method_significant_genes(input_dir, method_name, config):
         # read in data
         full_path = os.path.join(meth_input_dir, method_file)
         df = pd.read_table(full_path)
+        df['variant'] = df['gene'] + '_' + df['transcript'] + '_' + df['protein_change'].astype(str)
+        df['cna'] = df['gene']
 
         # get the treshold for significance
         thresh_col, score_val, top_direction = cfg.fetch_threshold(config, method_name)
 
+        # work around for rank based selection
+        if thresh_col == 'rank':
+            rank_order = True if top_direction=='low' else False
+            df['rank'] = df['score'].rank(ascending=rank_order)
+
         # figure out if a custom score or q-value is used
+        tmp_result = set()
         if cfg.is_valid_config(config, method_name, 'threshold'):
-            tmp_genes = set()
             # get the top scoring genes
-            top_direction = config[method_name]['threshold']['top']
-            if top_direction == 'low':
+            #top_direction = config[method_name]['threshold']['top']
+            if thresh_col == 'rank':
+                signif_df = df[df[thresh_col]<=score_val]
+            elif top_direction == 'low':
                 signif_df = df[df[thresh_col]<=score_val]
             else:
                 signif_df = df[df[thresh_col]>=score_val]
-            tmp_genes |= set(signif_df[gene].tolist())
-            signif_dict[cancer_type_name] = list(tmp_genes)
+            tmp_result |= set(signif_df[level].tolist())
+            signif_dict[cancer_type_name] = list(tmp_result)
         else:
             # use q-value for threshold
-            tmp_genes = set()
             # get the significant genes
             signif_df = df[df[thresh_col]<=score_val]
-            tmp_genes |= set(signif_df[gene].tolist())
-            signif_dict[cancer_type_name] = list(tmp_genes)
+            tmp_result |= set(signif_df[level].tolist())
+            signif_dict[cancer_type_name] = list(tmp_result)
     return signif_dict
 
 
@@ -153,6 +162,7 @@ def fetch_raw_dataframes(input_dir, method_name):
         # read in data
         full_path = os.path.join(meth_input_dir, method_file)
         df = pd.read_table(full_path)
+        df['variant'] = df['gene'] + '_' +df['transcript'] + '_' + df['protein_change'].astype(str)
 
         #data_dict[method_name] = df
         data_dict[cancer_type] = df
@@ -160,37 +170,24 @@ def fetch_raw_dataframes(input_dir, method_name):
     return data_dict
 
 
-def fetch_filtered_dataframes(input_dir, output_dir, min_methods, config, cgc_path=None):
+def fetch_filtered_dataframes(input_dir, blacklist, method):
     """Return the result files for each method as a dataframe, but with certain
     genes filtered out. This includes those agreed upon by some minimum
     number of methods or from the CGC.
     """
     # get the raw results
-    df_dict = fetch_raw_dataframes(input_dir)
-
-    # get the overlapping genes
-    overlap_path = os.path.join(output_dir, 'gene_overlap_counts.txt')
-    overlap_genes = read_method_overlap_genes(overlap_path, min_methods)
+    df_dict = fetch_raw_dataframes(input_dir, method)
 
     # gene column name
-    if cfg.is_valid_config(config, method_name, 'gene_col'):
-        gene = config[method_name]['gene_col']
-    else:
-        gene = 'gene'
-
-    # add in cgc genes, if available
-    if cgc_path is not None:
-        cgc_genes = process_cgc(cgc_path)
-        overlap_genes = list(set(overlap_genes + cgc_genes))
-
+    gene = 'gene'
     # iterate over each method
-    for method in df_dict:
+    for ctype in df_dict:
         # filter out agreed upon genes
-        df_copy = df_dict[method].copy()
-        df_copy = df_copy[~df_copy[gene].isin(overlap_genes)]
+        df_copy = df_dict[ctype].copy()
+        df_copy = df_copy[~df_copy[gene].isin(blacklist)]
 
         # update dictionary
-        df_dict[method] = df_copy
+        df_dict[ctype] = df_copy
 
     return df_dict
 
