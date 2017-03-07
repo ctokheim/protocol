@@ -108,12 +108,19 @@ def fetch_single_method_significant(input_dir, method_name, config, level='gene'
                 signif_df = df[df[thresh_col]<=score_val]
             else:
                 signif_df = df[df[thresh_col]>=score_val]
+
+            # remove cases that have filter equals fail
+            signif_df = signif_df[~signif_df['info'].astype(str).str.contains('FILTER=FAIL')]
+
+            # append results
             tmp_result |= set(signif_df[level].tolist())
             signif_dict[cancer_type_name] = list(tmp_result)
         else:
             # use q-value for threshold
             # get the significant genes
             signif_df = df[df[thresh_col]<=score_val]
+            # remove cases that have filter equals fail
+            signif_df = signif_df[~signif_df['info'].astype(str).str.contains('FILTER=FAIL')]
             tmp_result |= set(signif_df[level].tolist())
             signif_dict[cancer_type_name] = list(tmp_result)
     return signif_dict
