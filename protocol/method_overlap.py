@@ -52,7 +52,9 @@ def main(opts):
     logger.info('Running method_overlap sub-command . . .')
     config = utils.load_config(opts['config'])
 
-    all_signif_dict = utils.fetch_significant(opts['input_dir'], config, level='gene')
+    all_signif_dict = utils.fetch_significant(opts['input_dir'],
+                                              config,
+                                              level='gene')
     call_dict = {}
     gene_methods = cfg.fetch_level_names(config, level='gene')
     cancer_types = all_signif_dict[all_signif_dict.keys()[0]].keys()
