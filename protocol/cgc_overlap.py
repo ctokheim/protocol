@@ -29,8 +29,8 @@ def main(opts):
     config = utils.load_config(opts['config'])
 
     # get the significant genes for each method
-    signif_dict = utils.fetch_significant_genes(opts['input_dir'],
-                                                config)
+    signif_dict = utils.fetch_significant(opts['input_dir'],
+                                          config)
     num_methods = len(signif_dict)
 
     # read in driver genes
@@ -77,7 +77,7 @@ def main(opts):
             plot_data.cgc_overlap(overlap_df, cgc_path, list_name)
 
     # save result
-    cgc_path = os.path.join(opts['output'], 'gene_list_overlap.txt')
+    cgc_path = os.path.join(opts['output'], 'driver_list_overlap.txt')
     pd.concat(all_overlap_list).to_csv(cgc_path, sep='\t')
 
     logger.info('Finished list_overlap sub-command.')
