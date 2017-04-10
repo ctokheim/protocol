@@ -18,7 +18,7 @@ The required python packages are shown in the [requirements_plotting.txt](https:
 
 ### method results
 
-All results of a method should be stored in the same directory (specified by `--input-dir` option). Files should be named by cancer type or PANCAN for pan-cancer results. For example, pancancer should be PANCAN.txt and LUAD.txt for lung adenocarcinoma. The files are assumed to be tab-separated. It is **assumed** that you have a pancancer result (PANCAN.txt), but you may or may not include some number of cancer type specific results.
+All results should be stored in the same directory (specified by `--input-dir` option). Directories should be named for the method, and the name should match that found in the configuration file (see Configuration file section). Results for each method should be named by cancer type or PANCAN for pan-cancer results. For example, pancancer should be PANCAN.txt and LUAD.txt for lung adenocarcinoma. The files are assumed to be tab-separated. It is **assumed** that you have a pancancer result (PANCAN.txt), but you may or may not include some number of cancer type specific results.
 
 ### gene lists
 
@@ -33,23 +33,17 @@ $ wget https://raw.githubusercontent.com/ctokheim/protocol/master/data/kandoth_p
 
 ## Configuration file
 
-Often methods will have different column names for the gene names, p-values, and q-values. By default these will assume the gene name column is "gene", thep-value column name is "pvalue", and the q-value column name is "qvalue". This can be changed through a YAML configuration file. We have already provided you with a template configuration file (config.yaml) in the repository. Although, this file can be tweaked and/or further extended for additional methods. The configuration file has the following format:
+Often methods will have different column names for the gene names, p-values, and q-values. The config.yaml file can be tweaked and/or further extended for additional methods. The configuration file has the following format:
 
 ```yaml
 METHODNAME:
-    gene_col: gene
-    qvalue:
-        - qvalCol1
-        - qvalCol2
-    pvalue:
-        - pvalCol1
-        - pvalCol2
+    level: gene
     threshold:
-        score: 0.1
+        qvalue: 0.1
         top: low
 ```
 
-METHODNAME is the name of the method, which should match the method name provided through the command line argument. You can change the column name containing the gene name from "gene" to the column name of your method's result file. In this example, the method reports two p-values (column names: "pvalCol1" and "pvalCol2") and two q-values (column names: "qvalCol1" and "qvalCol2"). In the common case that a method reports one p-value/q-value column, then only one bullet point for each attribute would be needed. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low").
+METHODNAME is the name of the method, which should match the method name provided through the command line argument. You can change the column name containing the gene name from "gene" to the column name of your method's result file. The q-value threshold in this case was set at 0.1, and top significant genes are those below the threshold ("top" set to "low"). Note, if your threshold is based on a p-value or score then use "pvalue" or "score", respectively, instead of "qvalue".
 
 ## Platform
 
