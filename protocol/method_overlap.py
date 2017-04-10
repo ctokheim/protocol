@@ -92,9 +92,9 @@ def main(opts):
     method_overlap_df.to_csv(tmp_path, sep='\t')
     all_cols = method_overlap_df.columns.tolist()
     meth_melt_df = pd.melt(method_overlap_df, value_vars=all_cols).dropna()
-    import IPython ; IPython.embed()
-    raise
 
+
+    """
     # save result
     method_path = os.path.join(opts['output'], 'method_overlap.txt')
     method_ovlp_df.to_csv(method_path, sep='\t', index=False)
@@ -104,5 +104,6 @@ def main(opts):
         import plot_data
         plot_path = os.path.join(opts['output'], 'method_overlap.pdf')
         plot_data.method_overlap(method_ovlp_df, plot_path)
+    """
 
     logger.info('Finished method_overlap sub-command.')
