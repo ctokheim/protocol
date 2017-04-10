@@ -1,14 +1,153 @@
 ######################################
+# General configuration
+######################################
+exclude:
+    - OncodriveFM
+######################################
 # Configuration for individual methods
 ######################################
-2020+:
-    gene_col: gene
-    qvalue:
-        - oncogene q-value
-        - tsg q-value
-        - driver q-value
-    pvalue:
-        - driver p-value
+2020plus:
+    level: gene
     threshold:
-        score: 0.1
+        qvalue: 0.05
         top: low
+MutSig2CV:
+    level: gene
+    threshold:
+        qvalue: 0.1
+        top: low
+OncodriveFML:
+    level: gene
+    threshold:
+        qvalue: 0.25
+        top: low
+OncodriveCLUST:
+    level: gene
+    threshold:
+        qvalue: 0.05
+        top: low
+CompositeDriver:
+    level: gene
+    threshold:
+        qvalue: 0.05
+        top: low
+MuSiC:
+    level: gene
+    threshold:
+        pvalue: 1e-8
+        top: low
+e-Driver:
+    level: gene
+    threshold:
+        qvalue: 0.05
+        top: low
+e-Driver3D:
+    level: gene
+    threshold:
+        qvalue: 0.05
+        top: low
+HotMAPS:
+    level: gene
+    threshold:
+        qvalue: 0.01
+        top: low
+HotSpot3D:
+    level: gene
+    threshold:
+        rank: 999999999
+        top: high
+3DHotSpots.org:
+    level: gene
+    threshold:
+        pvalue: 0.05
+        top: low
+ActiveDriver:
+    level: gene
+    threshold:
+        qvalue: 0.00001
+        top: low
+HotNet2:
+    level: network
+    threshold:
+        rank: 50
+        top: high
+DriverNet:
+    level: cna
+    threshold:
+        qvalue: 0.05
+        top: low
+DriverNet-snv:
+    level: tmp
+    threshold:
+        qvalue: 0.05
+        top: low
+OncoIMPACT:
+    level: cna
+    threshold:
+        rank: 50
+        top: high
+OncoIMPACT-snv:
+    level: tmp
+    threshold:
+        rank: 10
+        top: high
+NetBox:
+    level: cna
+    threshold:
+        rank: 50
+        top: high
+NetBox-snv:
+    level: tmp
+    threshold:
+        rank: 10
+        top: high
+moonlight:
+    level: expression
+    threshold:
+        qvalue: 0.05
+        top: low
+CHASM:
+    level: variant
+    threshold:
+        qvalue: 0.05
+        top: low
+VEST:
+    level: variant
+    threshold:
+        pvalue: 0.01
+        top: low
+fathmm:
+    level: variant
+    threshold:
+        score: -.75
+        top: low
+transFIC:
+    level: variant
+    threshold:
+        score: 2
+        top: high
+MutationAssessor:
+    level: variant
+    threshold:
+        score: 1.9
+        top: high
+PolyPhen2:
+    level: variant
+    threshold:
+        score: 0.446
+        top: low
+SIFT:
+    level: variant
+    threshold:
+        score: 0.05
+        top: low
+MutationTaster:
+    level: variant
+    threshold:
+        score: 0.5
+        top: high
+CanDrA:
+    level: variant
+    threshold:
+        score: 0.0177
+        top: high
