@@ -103,4 +103,3 @@ def main(opts):
     bad_meth_df = pd.concat(bad_method_list, axis=1)
     out_path = os.path.join(opts['output'], 'less_reliable.txt')
     bad_meth_df.to_csv(out_path, sep='\t')
-    import IPython ; IPython.embed()
