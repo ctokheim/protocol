@@ -10,6 +10,8 @@ import datetime
 import os
 import sys
 import config as cfg
+import csv
+import re
 
 logger = logging.getLogger(__name__)  # module logger
 
@@ -74,6 +76,48 @@ def fetch_significant(input_dir, config, level='gene'):
     return signif_dict
 
 
+def read_residue_method(path):
+    with open(path) as handle:
+        myreader = csv.reader(handle, delimiter='\t')
+
+        # parse header
+        header = next(myreader)
+        pc_ix = header.index('protein_change')
+        info_ix = header.index('info')
+
+        # iterate through each line
+        output_list = []
+        for line in myreader:
+            # tmp copy
+            tmp = list(line)
+
+            # see if prot range specified
+            if len(line) < len(header):
+                matches = False
+            else:
+                matches = re.findall('PROT_RANGE=([0-9\-,]*)[;$]', line[info_ix])
+            if matches:
+                pos_list = matches[0].split(',')
+                for pos in pos_list:
+                    if '-' in pos:
+                        # add all residues in a range
+                        pos_split = map(int, pos.split('-'))
+                        for p in range(pos_split[0], pos_split[1]+1):
+                            tmp[pc_ix] = str(p)
+                            output_list.append(tmp)
+                    else:
+                        tmp[pc_ix] = pos
+                        output_list.append(list(tmp))
+            else:
+                # quick hack to fix formatting problems
+                if len(tmp) < len(header): tmp.append('')
+                output_list.append(tmp)
+
+        # create data frame
+        final_df = pd.DataFrame(output_list, columns=header)
+        return final_df
+
+
 def fetch_single_method_significant(input_dir, method_name, config, level='gene'):
     """Read the significant driver genes for a single method."""
     signif_dict = {}
@@ -85,8 +129,12 @@ def fetch_single_method_significant(input_dir, method_name, config, level='gene'
 
         # read in data
         full_path = os.path.join(meth_input_dir, method_file)
-        df = pd.read_table(full_path)
+        if level == 'residue':
+            df = read_residue_method(full_path)
+        else:
+            df = pd.read_table(full_path)
         df['variant'] = df['gene'] + '_' + df['transcript'] + '_' + df['protein_change'].astype(str)
+        df['residue'] = df['gene'] + '_' + df['transcript'] + '_' + df['protein_change'].astype(str)
         df['cna'] = df['gene']
 
         # get the treshold for significance
@@ -103,14 +151,14 @@ def fetch_single_method_significant(input_dir, method_name, config, level='gene'
             # get the top scoring genes
             #top_direction = config[method_name]['threshold']['top']
             if thresh_col == 'rank':
-                signif_df = df[df[thresh_col]<=score_val]
+                signif_df = df[df[thresh_col].astype(float)<=score_val]
             elif top_direction == 'low':
-                signif_df = df[df[thresh_col]<=score_val]
+                signif_df = df[df[thresh_col].astype(float)<=score_val]
             else:
-                signif_df = df[df[thresh_col]>=score_val]
+                signif_df = df[df[thresh_col].astype(float)>=score_val]
 
             # remove cases that have filter equals fail
-            signif_df = signif_df[~signif_df['info'].astype(str).str.contains('FILTER=FAIL')]
+            signif_df = signif_df[~signif_df['info'].astype(str).str.contains('FILTER=FAIL|FILTER=LGF|FILTER=LDA')]
 
             # append results
             tmp_result |= set(signif_df[level].tolist())
@@ -118,9 +166,9 @@ def fetch_single_method_significant(input_dir, method_name, config, level='gene'
         else:
             # use q-value for threshold
             # get the significant genes
-            signif_df = df[df[thresh_col]<=score_val]
+            signif_df = df[df[thresh_col].astype(float)<=score_val]
             # remove cases that have filter equals fail
-            signif_df = signif_df[~signif_df['info'].astype(str).str.contains('FILTER=FAIL')]
+            signif_df = signif_df[~signif_df['info'].astype(str).str.contains('FILTER=FAIL|FILTER=LGF|FILTER=LDA')]
             tmp_result |= set(signif_df[level].tolist())
             signif_dict[cancer_type_name] = list(tmp_result)
     return signif_dict

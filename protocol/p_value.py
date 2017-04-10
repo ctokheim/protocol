@@ -16,7 +16,8 @@ def calculate_mlfc(df, meth_name, config):
     # calculate the mlfc scores for each pvalue column
     mlfc_score_list = []
     for pval_col in pval_cols:
-        pvals = df[pval_col].dropna().copy()
+        #pvals = df[pval_col].dropna().copy()
+        pvals = df[pval_col].fillna(1.0).copy()
         tmp_score = eval_stats.mean_log_fold_change(pvals)
         mlfc_score_list.append(tmp_score)
 

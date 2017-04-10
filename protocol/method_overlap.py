@@ -74,7 +74,7 @@ def main(opts):
         call_dict[cancer_type] = call_df
 
         # save dataframe
-        tmp_path = os.path.join(opts['output'], cancer_type+'.gene_overlap.txt')
+        tmp_path = os.path.join(opts['output'], cancer_type+'.overlap.txt')
         call_df.to_csv(tmp_path, sep='\t')
 
     # eliminate any excluded methods
@@ -88,7 +88,7 @@ def main(opts):
 
     # Analyze method counts
     method_overlap_df = method_overlap_count(call_dict, config, level='gene')
-    tmp_path = os.path.join(opts['output'], 'gene_overlap.txt')
+    tmp_path = os.path.join(opts['output'], 'overlap.txt')
     method_overlap_df.to_csv(tmp_path, sep='\t')
     all_cols = method_overlap_df.columns.tolist()
     meth_melt_df = pd.melt(method_overlap_df, value_vars=all_cols).dropna()

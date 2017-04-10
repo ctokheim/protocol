@@ -151,7 +151,7 @@ def main(opts):
     kandoth = cgc_overlap.read_custom_list(opts['kandoth'])
     tamborero = cgc_overlap.read_custom_list(opts['high_confidence_list'])
 
-    gene_methods = cfg.fetch_gene_level_names(config)
+    gene_methods = cfg.fetch_level_names(config, level='gene')
     for method_name in gene_methods:
         logger.info('Analyzing: {0}'.format(method_name))
 
@@ -160,45 +160,50 @@ def main(opts):
         if not os.path.exists(meth_out_dir): os.makedirs(meth_out_dir)
 
         # get significant genes
-        signif_dict = utils.fetch_single_method_significant_genes(opts['input_dir'],
-                                                                  method_name,
-                                                                  config)
-        pancan_df = pd.read_table(os.path.join(opts['input_dir'], method_name, 'PANCAN.txt'))
-
+        signif_dict = utils.fetch_single_method_significant(opts['input_dir'],
+                                                            method_name,
+                                                            config)
 
         ###########################
         # Pan-cancer plots
         ###########################
-        # overlap with gene lists
-        logger.info('Overlapping genes with CGC, Cancer Genome Landscapes, kandoth et al, and tamborero et al. . . .')
-        pancan_genes = set(signif_dict['PANCAN'])
-        intersect_cgc = len(pancan_genes & set(cgc))
-        intersect_landscapes = len(pancan_genes & set(landscapes))
-        intersect_kandoth = len(pancan_genes & set(kandoth))
-        intersect_tamborero = len(pancan_genes & set(tamborero))
-        all_lists = (set(cgc) | set(landscapes) | set(kandoth) | set(tamborero))
-        intersect_all = len(pancan_genes & all_lists)
-        s = pd.Series([intersect_cgc, intersect_landscapes, intersect_kandoth, intersect_tamborero, intersect_all],
-                      index=['CGC', 'Landscapes', 'Kandoth et al.', 'Tamborero et al.', 'Any list'])
-        s = s / len(pancan_genes)
-        out_path = os.path.join(opts['output'], method_name, 'gene_list_overlap.pdf')
-        plot_data.single_method_overlap(s, out_path)
-        logger.info('Finished')
+        is_pval = False
+        if 'PANCAN' in signif_dict:
+            # read pancancer data
+            pancan_df = pd.read_table(os.path.join(opts['input_dir'], method_name, 'PANCAN.txt'))
 
-        # qq-plot
-        # figure out which columns are being used
-        pval_col = 'pvalue'
-        if pancan_df[pval_col].iloc[0] != '.':
-            logger.info('Creating p-value QQ plot . . .')
-            out_path = os.path.join(opts['output'], method_name, 'qq_plot.png')
-            plot_data.single_method_qqplot(pancan_df[pval_col], out_path)
-            logger.info('Finished.')
+            # overlap with gene lists
+            logger.info('Overlapping genes with CGC, Cancer Genome Landscapes, kandoth et al, and tamborero et al. . . .')
+            pancan_genes = set(signif_dict['PANCAN'])
+            intersect_cgc = len(pancan_genes & set(cgc))
+            intersect_landscapes = len(pancan_genes & set(landscapes))
+            intersect_kandoth = len(pancan_genes & set(kandoth))
+            intersect_tamborero = len(pancan_genes & set(tamborero))
+            all_lists = (set(cgc) | set(landscapes) | set(kandoth) | set(tamborero))
+            intersect_all = len(pancan_genes & all_lists)
+            s = pd.Series([intersect_cgc, intersect_landscapes, intersect_kandoth, intersect_tamborero, intersect_all],
+                        index=['CGC', 'Landscapes', 'Kandoth et al.', 'Tamborero et al.', 'Any list'])
+            s = s / len(pancan_genes)
+            out_path = os.path.join(opts['output'], method_name, 'gene_list_overlap.pdf')
+            plot_data.single_method_overlap(s, out_path)
+            logger.info('Finished')
+
+            # qq-plot
+            # figure out which columns are being used
+            pval_col = 'pvalue'
+            is_pval = pancan_df[pval_col].iloc[0] != '.'
+            if is_pval:
+                logger.info('Creating p-value QQ plot . . .')
+                out_path = os.path.join(opts['output'], method_name, 'qq_plot.png')
+                plot_data.single_method_qqplot(pancan_df[pval_col], out_path)
+                logger.info('Finished.')
 
         ###########################
         # Cancer type specific plots
         ###########################
         cancer_type_col = opts['tumor_type_col']
-        del signif_dict['PANCAN']
+        if 'PANCAN' in signif_dict:
+            del signif_dict['PANCAN']
         if not signif_dict:
             return
         # process maf file
@@ -233,15 +238,16 @@ def main(opts):
         logger.info('Finished.')
 
         # plot the MLFC scores
-        logger.info('Analyzing the divergence of p-values from expectations . . .')
-        pval_dict = utils.read_filtered_pvalues(opts['input_dir'], all_lists,
-                                                config, method_name)
-        mlfc_dict = {t: p_value.calculate_mlfc(pval_dict[t], method_name, config)
-                     for t in pval_dict}
-        mlfc_series = pd.Series(mlfc_dict)
-        out_path = os.path.join(opts['output'], method_name, 'cancer_type_mlfc.pdf')
-        plot_data.mlfc_score(mlfc_series, out_path)
-        logger.info('Finished.')
+        if is_pval:
+            logger.info('Analyzing the divergence of p-values from expectations . . .')
+            pval_dict = utils.read_filtered_pvalues(opts['input_dir'], all_lists,
+                                                    config, method_name)
+            mlfc_dict = {t: p_value.calculate_mlfc(pval_dict[t], method_name, config)
+                        for t in pval_dict}
+            mlfc_series = pd.Series(mlfc_dict)
+            out_path = os.path.join(opts['output'], method_name, 'cancer_type_mlfc.pdf')
+            plot_data.mlfc_score(mlfc_series, out_path)
+            logger.info('Finished.')
 
 
 def cli_main():
