@@ -30,13 +30,6 @@ def parse_arguments():
 
     # add subparsers
     subparsers = parent_parser.add_subparsers(title='Sub-commands', dest='kind')
-    #parser_pipeline = subparsers.add_parser('pipeline',
-                                            #help='Run all sub-commands evaluating methods',
-                                            #description='Run all sub-commands evaluating methods')
-    #parser_split = subparsers.add_parser('split_mutations',
-                                         #help='Splits mutations in a MAF-like format into two random halves',
-                                         #description='Splits mutations in a MAF-like format into two random halves. '
-                                         #'Each split maintains the proportion of samples in each cancer type.')
     parser_cgc = subparsers.add_parser('list_overlap',
                                        help='Evaluate the overlap of significant genes with a previous driver gene list',
                                        description='Evaluate the overlap of significant genes with a previous driver gene list')
@@ -49,35 +42,26 @@ def parse_arguments():
     parser_signif = subparsers.add_parser('num_signif',
                                           help='Examine the number of significant genes',
                                           description='Examine the number of significant genes')
-    #help_info = 'Evaluate method consistency'
-    #parser_consis = subparsers.add_parser('consistency',
-                                          #help=help_info,
-                                          #description='Evaluate method consistency')
-    help_info = 'Perform consensus analysis'
+    help_info = 'Perform driver gene consensus analysis'
     parser_consensus = subparsers.add_parser('consensus',
                                              help=help_info,
-                                             description='Examine the method consensus')
+                                             description='Perform driver gene consensus analysis')
 
     # program arguments
-    for i, parser in enumerate([None, None, parser_cgc, parser_ovlp,
-                                parser_pval, parser_signif, None,
+    for i, parser in enumerate([parser_cgc, parser_ovlp,
+                                parser_pval, parser_signif,
                                 parser_consensus]):
-        if i in [0, 1, 6]: continue
 
         # group of parameters
         major_parser = parser.add_argument_group(title='Major options')
         advance_parser = parser.add_argument_group(title='Advanced options')
 
-        if i != 1 and i != 6 and i != 7:
+        if i != 4:
             help_str = 'directory containing results from methods on full data'
             major_parser.add_argument('-i', '--input-dir',
                                     type=str, default=None,
                                     help=help_str)
-        elif i == 1:
-            help_str = 'Mutation file to split'
-            major_parser.add_argument('-m', '--mutations',
-                                      type=str, required=True,
-                                      help=help_str)
+
         help_str = 'Configuration file (YAML format)'
         major_parser.add_argument('-config', '--config',
                                   type=str, default=None,
@@ -87,48 +71,7 @@ def parse_arguments():
                                   type=str, default=None,
                                   help=help_str)
 
-        if i == 0:
-            list_parser = major_parser.add_mutually_exclusive_group(required=True)
-            help_str = 'Path to Cancer Gene Census file'
-            list_parser.add_argument('-c', '--cgc',
-                                     type=str, default=None,
-                                     help=help_str)
-            help_str = 'Custom driver gene list'
-            list_parser.add_argument('-g', '--gene-list',
-                                     type=str, default=None,
-                                     help=help_str)
-            help_str = ('Minimum number of methods finding a gene significant to '
-                        'not include that gene\' p-value (Default: 3)')
-            major_parser.add_argument('-m', '--min',
-                                      type=int, default=3,
-                                      help=help_str)
-            help_str = 'Directory containing the consistency results'
-            major_parser.add_argument('-consis-dir', '--consistency-dir',
-                                      type=str, required=True,
-                                      help=help_str)
-            help_str = 'Q-value threshold for significance (Default: 0.1)'
-            advance_parser.add_argument('-q', '--qvalue',
-                                        type=float, default=.1,
-                                        help=help_str)
-            help_str = 'Ranking depth to consider for consistency (Default: 100)'
-            advance_parser.add_argument('-d', '--depth',
-                                        type=int, default=100,
-                                        help=help_str)
-            help_str = 'Generate plots examining evaluation (Default: False)'
-            advance_parser.add_argument('-p', '--plot',
-                                        action='store_true', default=False,
-                                        help=help_str)
-        if i == 1:
-            help_str = ('Column name containing sample IDs (Default: checks '
-                        '"Tumor_Sample_Barcode" or "Tumor_Sample")')
-            advance_parser.add_argument('-s', '--sample-col',
-                                        type=str,
-                                        help=help_str)
-            help_str = 'Number of iterations to randomly split data (Default: 10)'
-            advance_parser.add_argument('-n', '--number',
-                                        type=int, default=10,
-                                        help=help_str)
-        elif i == 2 or i == 4:
+        if i == 0 or i == 2:
             #list_parser = major_parser.add_mutually_exclusive_group(required=True)
             help_str = 'Path to Cancer Gene Census file'
             major_parser.add_argument('-c', '--cgc',
@@ -154,34 +97,17 @@ def parse_arguments():
             advance_parser.add_argument('-p', '--plot',
                                         action='store_true', default=False,
                                         help=help_str)
+        elif i == 1:
+            help_str = 'Generate plots examining evaluation (Default: False)'
+            advance_parser.add_argument('-p', '--plot',
+                                        action='store_true', default=False,
+                                        help=help_str)
         elif i == 3:
-            help_str = 'Q-value threshold for significance (Default: 0.1)'
-            advance_parser.add_argument('-q', '--qvalue',
-                                        type=float, default=.1,
-                                        help=help_str)
             help_str = 'Generate plots examining evaluation (Default: False)'
             advance_parser.add_argument('-p', '--plot',
                                         action='store_true', default=False,
                                         help=help_str)
-        elif i == 5:
-            help_str = 'Generate plots examining evaluation (Default: False)'
-            advance_parser.add_argument('-p', '--plot',
-                                        action='store_true', default=False,
-                                        help=help_str)
-        elif i == 6:
-            help_str = 'Directory containing the consistency results'
-            major_parser.add_argument('-consis-dir', '--consistency-dir',
-                                      type=str, required=True,
-                                      help=help_str)
-            help_str = 'Ranking depth to consider for consistency (Default: 100)'
-            advance_parser.add_argument('-d', '--depth',
-                                        type=int, default=100,
-                                        help=help_str)
-            help_str = 'Generate plots examining evaluation (Default: False)'
-            advance_parser.add_argument('-p', '--plot',
-                                        action='store_true', default=False,
-                                        help=help_str)
-        elif i == 7:
+        elif i == 4:
             help_str = 'Flag indicating not to weight methods'
             major_parser.add_argument('--not-weighted',
                                       action='store_true', default=False,
