@@ -158,21 +158,7 @@ def main(opts):
         os.makedirs(opts['output'])
 
     # run commands
-    if opts['kind'] == 'pipeline':
-        import cgc_overlap
-        import method_overlap
-        import p_value
-        import num_genes
-        import consistency
-        cgc_overlap.main(opts)
-        method_overlap.main(opts)
-        p_value.main(opts)
-        num_genes.main(opts)
-        consistency.main(opts)
-    elif opts['kind'] == 'split_mutations':
-        import split_mutations
-        split_mutations.main(opts)
-    elif opts['kind'] == 'list_overlap':
+    if opts['kind'] == 'list_overlap':
         import cgc_overlap
         cgc_overlap.main(opts)
     elif opts['kind'] == 'method_overlap':
@@ -184,9 +170,6 @@ def main(opts):
     elif opts['kind'] == 'num_signif':
         import num_genes
         num_genes.main(opts)
-    elif opts['kind'] == 'consistency':
-        import consistency
-        consistency.main(opts)
     elif opts['kind'] == 'consensus':
         import consensus
         consensus.main(opts)
