@@ -1,7 +1,6 @@
 # Protocol
 
-This code is meant to perform basic plots for driver gene prediction methods that specifically report a p-value.
-It generates plots for overlap with various gene lists (CGC, cancer genome landscapes, kandoth et al. pancan12, and tamborero et al. pancan12 high confidence drivers), p-value qq plot, average number of non-silent mutated driver genes per sample, and number of significant driver genes per cancer type. This is a work in progress, and suggestions are appreciated.
+This code is meant to create a list of consensus driver genes in cancer based on the results of several methods.
 
 ## Installation
 
@@ -9,10 +8,10 @@ You can pip install the package:
 
 ```bash
 $ pip install git+git://github.com/ctokheim/protocol.git
-$ standard_plots --help
+$ driver_protocol --help
 ```
 
-The required python packages are shown in the [requirements_plotting.txt](https://github.com/ctokheim/protocol/blob/master/requirements_plotting.txt) file.
+The required python packages are shown in the [requirements_plotting.txt](https://github.com/ctokheim/protocol/blob/master/requirements_plotting.txt) file. The "driver_protocol" command represents the "protcol.py" file in the source code.
 
 ## Data files
 
