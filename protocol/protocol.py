@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)  # module logger
 
 def parse_arguments():
     # make a parser
-    info = 'Evaluates cancer driver gene methods'
+    info = 'Consensus driver gene analysis'
     parent_parser = argparse.ArgumentParser(description=info)
 
     # logging arguments
@@ -30,16 +30,16 @@ def parse_arguments():
 
     # add subparsers
     subparsers = parent_parser.add_subparsers(title='Sub-commands', dest='kind')
-    parser_pipeline = subparsers.add_parser('pipeline',
-                                            help='Run all sub-commands evaluating methods',
-                                            description='Run all sub-commands evaluating methods')
-    parser_split = subparsers.add_parser('split_mutations',
-                                         help='Splits mutations in a MAF-like format into two random halves',
-                                         description='Splits mutations in a MAF-like format into two random halves. '
-                                         'Each split maintains the proportion of samples in each cancer type.')
+    #parser_pipeline = subparsers.add_parser('pipeline',
+                                            #help='Run all sub-commands evaluating methods',
+                                            #description='Run all sub-commands evaluating methods')
+    #parser_split = subparsers.add_parser('split_mutations',
+                                         #help='Splits mutations in a MAF-like format into two random halves',
+                                         #description='Splits mutations in a MAF-like format into two random halves. '
+                                         #'Each split maintains the proportion of samples in each cancer type.')
     parser_cgc = subparsers.add_parser('list_overlap',
-                                       help='Evaluate the overlap of significant genes with the Cancer Gene Census (CGC)',
-                                       description='Evaluate the overlap of significant genes with the Cancer Gene Census (CGC)')
+                                       help='Evaluate the overlap of significant genes with a previous driver gene list',
+                                       description='Evaluate the overlap of significant genes with a previous driver gene list')
     parser_ovlp = subparsers.add_parser('method_overlap',
                                         help='Counts the number of methods that find specific genes significant',
                                         description='Counts the number of methods that find specific genes significant')
@@ -49,18 +49,21 @@ def parse_arguments():
     parser_signif = subparsers.add_parser('num_signif',
                                           help='Examine the number of significant genes',
                                           description='Examine the number of significant genes')
-    help_info = 'Evaluate method consistency'
-    parser_consis = subparsers.add_parser('consistency',
-                                          help=help_info,
-                                          description='Evaluate method consistency')
+    #help_info = 'Evaluate method consistency'
+    #parser_consis = subparsers.add_parser('consistency',
+                                          #help=help_info,
+                                          #description='Evaluate method consistency')
     help_info = 'Perform consensus analysis'
     parser_consensus = subparsers.add_parser('consensus',
                                              help=help_info,
                                              description='Examine the method consensus')
 
     # program arguments
-    for i, parser in enumerate([parser_pipeline, parser_split, parser_cgc, parser_ovlp,
-                                parser_pval, parser_signif, parser_consis, parser_consensus]):
+    for i, parser in enumerate([None, None, parser_cgc, parser_ovlp,
+                                parser_pval, parser_signif, None,
+                                parser_consensus]):
+        if i in [0, 1, 6]: continue
+
         # group of parameters
         major_parser = parser.add_argument_group(title='Major options')
         advance_parser = parser.add_argument_group(title='Advanced options')
